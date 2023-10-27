@@ -16,10 +16,21 @@ dependencies:
   provider: ^6.0.0
 
 dev_dependencies:
+  test: any
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
 
   flutter_lints: ^2.0.0
+  patrol: ^2.1.0
 
 flutter:
   uses-material-design: true
+
+patrol:
+  app_name: flutter_app_playground
+  android:
+    package_name: com.example.flutter_app_playground
+  ios:
+    bundle_id: com.example.flutter_app_playground
