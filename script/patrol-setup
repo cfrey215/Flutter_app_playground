@@ -1,6 +1,7 @@
 #!/bin/bash
 
-PATROL_CLI_VERSION="2.2.2"   # Patrol CLI Version required for Patrol 2.3.2 framework
+# PATROL_CLI_VERSION="2.2.2"   # Patrol CLI Version required for Patrol 2.3.2 framework
+PATROL_CLI_VERSION="2.2.0"   # Patrol CLI Version required for Patrol 2.3.0 framework
 # PATROL_CLI_VERSION="2.1.2"   # Patrol CLI Version required for Patrol 2.2.4 framework
 
 echo

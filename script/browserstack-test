@@ -7,7 +7,7 @@ AUT_APP_PATH="@/Users/christopher.frey/development/learning/flutter_app_playgrou
 TEST_APP_PATH="@/Users/christopher.frey/development/learning/flutter_app_playground/build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
 APP_URL=""
 TEST_SUITE_URL=""
-BS_PROJECT_NAME="flutter_app_playground-Patrol-2.3.2"
+BS_PROJECT_NAME="flutter_app_playground-Patrol-2.3.0"
 BS_LOCAL_TESTING="false"
 
 echo
