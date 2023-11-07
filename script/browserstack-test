@@ -2,6 +2,7 @@
 
 AUT_UPLOAD_URL="https://api-cloud.browserstack.com/app-automate/flutter-integration-tests/v2/android/app"
 TEST_SUITE_UPLOAD_URL="https://api-cloud.browserstack.com/app-automate/flutter-integration-tests/v2/android/test-suite"
+TEST_BUILD_URL="https://api-cloud.browserstack.com/app-automate/flutter-integration-tests/v2/android/build"
 AUT_APP_PATH="@/Users/christopher.frey/development/learning/flutter_app_playground/build/app/outputs/apk/debug/app-debug.apk"
 TEST_APP_PATH="@/Users/christopher.frey/development/learning/flutter_app_playground/build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
 APP_URL=""
@@ -108,7 +109,7 @@ function execute_test_run() {
     echo "==> Execute Browserstack test run..."
 
     curl -u "${BS_USERNAME}:${BS_ACCESS_TOKEN}" \
-        -X POST "https://api-cloud.browserstack.com/app-automate/flutter-integration-tests/v2/android/build" \
+        -X POST "${TEST_BUILD_URL}" \
         -d '{
         "app": "'"${APP_URL}"'",
         "testSuite": "'"${TEST_SUITE_URL}"'",
