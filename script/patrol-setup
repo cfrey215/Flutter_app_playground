@@ -1,0 +1,112 @@
+#!/bin/bash
+
+PATROL_CLI_VERSION="2.2.2"   # Patrol CLI Version required for Patrol 2.3.2 framework
+# PATROL_CLI_VERSION="2.1.2"   # Patrol CLI Version required for Patrol 2.2.4 framework
+
+echo
+echo "==> -load-env: loading environment…"
+
+if [ -f .env ]; then
+    # Load .env vars
+    . .env
+else
+    echo
+    echo "    ERROR: Missing .env file."
+    echo
+    exit 1;
+fi
+
+USE_FVM="${USE_FVM:-false}"
+echo "  ==> USE_FVM: ${USE_FVM}"
+
+echo
+echo "==> patrol-setup: verifying jq…"
+
+if ! [ -x "$(command -v jq)" ]; then
+    echo
+    echo "    Please install the jq command: https://stedolan.github.io/jq/download/"
+    exit 1
+else
+    echo "    Found jq version: $(jq --version)"
+fi
+
+
+echo
+echo "==> patrol-setup: verifying Node.js…"
+
+if ! [ -x "$(command -v node)" ]; then
+    echo
+    echo "    Please install Node.js: https://nodejs.org/en/download/"
+    exit 1
+fi
+
+node_version="$(node --version)"
+echo "    Found node version: ${node_version}"
+if ! [[ $node_version =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+    echo
+    echo "    Could not parse node version: ${node_version}"
+    echo "    Please install node v14.x"
+    exit 1
+fi
+
+echo
+echo "==> patrol-setup: verifying Flutter…"
+
+if [ "$(command -v fvm)" ] && [ "${USE_FVM}" = "true" ]; then
+    flutter_command="fvm flutter"
+    dart_command="fvm dart"
+    patrol_command="fvm exec patrol"
+    echo "    - using FVM"
+elif [ "$(command -v flutter)" ]; then
+    flutter_command="flutter"
+    dart_command="dart"
+    patrol_command="patrol"
+    echo "    - using Flutter, not using FVM"
+fi
+flutter_version_line="$(${flutter_command} --version | head -n 1)"
+flutter_channel="$(echo "${flutter_version_line}" | awk -F ' • ' '{print $2}' | awk '{print $2}')"
+flutter_version="$(echo "${flutter_version_line}" | awk -F ' • ' '{print $1}' | awk '{print $2}')"
+echo "    Found ${flutter_command} version: ${flutter_version}"
+echo "    Found ${flutter_command} channel: ${flutter_channel}"
+
+if [ "${flutter_channel}" != "stable" ] && [ "${USE_FVM}" = "false" ]; then
+     echo
+     echo "    Please switch Flutter to stable channel"
+     echo "    Try running: flutter channel stable"
+     exit 1
+fi
+
+# # check that the installed flutter matches the fvm config
+# fvm_flutter_sdk_version="$(jq -r '.flutterSdkVersion' .fvm/fvm_config.json)"
+
+# if [ "${flutter_version}" != "${fvm_flutter_sdk_version}" ]; then
+#      echo
+#      echo "    Please install Flutter ${fvm_flutter_sdk_version} or use fvm"
+#      echo "    Try running: flutter upgrade"
+#      exit 1
+# fi
+
+echo
+echo "==> patrol-setup: refreshing packages…"
+unset DEBUG
+${flutter_command} pub get
+
+echo
+echo "==> patrol-setup: cli version check…"
+
+${patrol_command} --version
+
+echo
+echo "==> patrol-setup: deactivate patrol_cli…"
+
+dart pub global deactivate patrol_cli
+
+echo
+echo "==> patrol-setup: activate patrol_cli…"
+
+${dart_command} pub global activate patrol_cli ${PATROL_CLI_VERSION}
+
+echo
+echo "==> patrol-setup: cli version check…"
+
+${patrol_command} --version
