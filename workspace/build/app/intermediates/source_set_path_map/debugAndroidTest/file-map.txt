@@ -1,0 +1,7 @@
+com.example.flutter_app_playground.test.app-androidTest-0 /Users/christopher.frey/development/learning/flutter_app_playground/workspace/android/app/src/androidTest/res
+com.example.flutter_app_playground.test.app-androidTestDebug-1 /Users/christopher.frey/development/learning/flutter_app_playground/workspace/android/app/src/androidTestDebug/res
+com.example.flutter_app_playground.test.app-androidTest-2 /Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/generated/res/resValues/androidTest/debug
+com.example.flutter_app_playground.test.app-androidTest-3 /Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/generated/res/rs/androidTest/debug
+com.example.flutter_app_playground.test.app-mergeDebugAndroidTestResources-4 /Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/merged.dir
+com.example.flutter_app_playground.test.app-mergeDebugAndroidTestResources-5 /Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/stripped.dir
+com.example.flutter_app_playground.test.app-merged_res-6 /Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/intermediates/merged_res/debugAndroidTest
