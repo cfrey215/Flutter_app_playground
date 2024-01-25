@@ -1,0 +1,66 @@
+Note: Unnecessary use of -X or --request, GET is already inferred.
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying 52.3.37.85:443...
+* Connected to api-cloud.browserstack.com (52.3.37.85) port 443
+* ALPN: curl offers h2,http/1.1
+* (304) (OUT), TLS handshake, Client hello (1):
+} [331 bytes data]
+*  CAfile: /etc/ssl/cert.pem
+*  CApath: none
+* (304) (IN), TLS handshake, Server hello (2):
+{ [89 bytes data]
+* TLSv1.2 (IN), TLS handshake, Certificate (11):
+{ [4972 bytes data]
+* TLSv1.2 (IN), TLS handshake, Server key exchange (12):
+{ [333 bytes data]
+* TLSv1.2 (IN), TLS handshake, Server finished (14):
+{ [4 bytes data]
+* TLSv1.2 (OUT), TLS handshake, Client key exchange (16):
+} [70 bytes data]
+* TLSv1.2 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.2 (OUT), TLS handshake, Finished (20):
+} [16 bytes data]
+* TLSv1.2 (IN), TLS change cipher, Change cipher spec (1):
+{ [1 bytes data]
+* TLSv1.2 (IN), TLS handshake, Finished (20):
+{ [16 bytes data]
+* SSL connection using TLSv1.2 / ECDHE-RSA-AES128-GCM-SHA256
+* ALPN: server did not agree on a protocol. Uses default.
+* Server certificate:
+*  subject: CN=*.browserstack.com
+*  start date: Nov 21 00:00:00 2023 GMT
+*  expire date: Dec 19 23:59:59 2024 GMT
+*  subjectAltName: host "api-cloud.browserstack.com" matched cert's "*.browserstack.com"
+*  issuer: C=US; O=Amazon; CN=Amazon RSA 2048 M03
+*  SSL certificate verify ok.
+* using HTTP/1.x
+* Server auth using Basic with user 'christopherfrey_er3Xts'
+> GET /app-automate/flutter-integration-tests/v2/android/builds/2d2e1197807da725319b5bb3117a5a8009706243/sessions/3517656f646b8d76d6ced2000eb1170512bca1c9/report HTTP/1.1
+> Host: api-cloud.browserstack.com
+> Authorization: Basic Y2hyaXN0b3BoZXJmcmV5X2VyM1h0czpUd3lzQ1BHNFh5SHNua2haTTNINQ==
+> User-Agent: curl/8.4.0
+> Accept: */*
+> 
+< HTTP/1.1 200 OK
+< Cache-Control: max-age=0, private, must-revalidate
+< CF-Cache-Status: DYNAMIC
+< CF-RAY: 857fceb29d3b0588-IAD
+< Content-Type: text/xml; charset=utf-8
+< Date: Mon, 19 Feb 2024 16:15:14 GMT
+< Last-Modified: Mon, 19 Feb 2024 02:06:15 GMT
+< Server: nginx
+< Set-Cookie: tracking_id=137c00da-29a2-494e-a18b-f1a974d3de3e; domain=.browserstack.com; path=/; expires=Mon, 19 Feb 2029 16:15:14 GMT
+< Set-Cookie: __cf_bm=0odUOKY3wqzDhgxEMDb47qH9hfGcCsvOMEYREIaRrRQ-1708359314-1.0-AXFN/Icp9lzHVnlfIl3J88aoUMURKzVGM2Lif5M3QkMEDP3WJoR1tyVYT8YSPinf+s1Qr8UcaYjfAYQ/1PR8UCQ=; path=/; expires=Mon, 19-Feb-24 16:45:14 GMT; domain=.browserstack.com; HttpOnly; Secure; SameSite=None
+< Temp-Header: 12-4563414-6-1708359314.464-api.browserstack.com
+< x-amz-expiration: expiry-date="Sat, 20 Apr 2024 00:00:00 GMT", rule-id="Yjc3ZTAxMDQtYTkyNi00NGM2LThlYjctOTIyNWRlNWZmNGM2"
+< x-amz-id-2: OLkc2Uh8DR7jWzNp+s5VZ+W2YrQyA8uNtnrCIZJB+6NaynB+6ypFejP7NaO5Qc7u5Re+Q8qmR/U=
+< x-amz-request-id: D9K67PMZDRR2VY54
+< x-amz-server-side-encryption: AES256
+< transfer-encoding: chunked
+< Connection: keep-alive
+< 
+{ [882 bytes data]
+100   875    0   875    0     0   3443      0 --:--:-- --:--:-- --:--:--  3458
+* Connection #0 to host api-cloud.browserstack.com left intact

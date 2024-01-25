@@ -1,0 +1,295 @@
+on: [push]
+
+env:
+  INPUT_NAME: "chrisman"
+  BS_LOCAL_IDENTIFIER: "bs-id-${{ github.event.number }}"
+  BS_PROJECT_NAME: "Bstack Project"
+  
+
+jobs:
+  # build:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: update local.properties
+  #       run: |
+  #         MY_STRING="sdk.dir=/Android/sdk \n
+  #           flutter.sdk=/flutter \n
+  #           flutter.buildMode=debug \n
+  #           flutter.versionName=1.0.0"
+  #         echo "$MY_STRING" > $GITHUB_WORKSPACE/workspace/android/local.properties
+
+  #     - name: write gradle.properties file
+  #       run: |
+  #         MY_STRING="ujetAwsAccessKeyValue= \n
+  #           ujetAwsSecretKeyValue= \n"
+  #         echo "$MY_STRING" > $GITHUB_WORKSPACE/workspace/android/gradle.properties
+
+  #     - name: Show file content
+  #       run: |
+  #         pwd
+  #         ls -la
+  #         cat $GITHUB_WORKSPACE/workspace/android/local.properties
+  #         cat $GITHUB_WORKSPACE/workspace/android/gradle.properties
+
+  #     - run: ls -la $GITHUB_WORKSPACE/workspace
+  #     - uses: ./.github/actions/hello-world
+  #       with:
+  #         who-to-greet: 'Yo Yo Ma!'
+  #     - run: ls -la $GITHUB_WORKSPACE
+  #     - run: ls -la $GITHUB_WORKSPACE/workspace
+  #     - run: ls -la /home/runner/work/_temp/_github_home
+  #     # - run: cd $GITHUB_WORKSPACE/workspace && flutter build apk --debug
+  #     # - uses: actions/upload-artifact@v2
+  #     #   with:
+  #     #     name: workspace_artifacts
+  #     #     path: ${{github.workspace}}
+  #     # - uses: actions/upload-artifact@v2
+  #     #   with:
+  #     #     name: home-artifacts
+  #     #     path: /home/runner/work/_temp/_github_home
+
+
+  # container-test-job:
+  #   runs-on: ubuntu-latest
+  #   container:
+  #     image: cfrey222/exploratory-things:parent
+  #     credentials:
+  #       username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #       password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #     env:
+  #       NODE_ENV: development
+  #     ports:
+  #       - 80
+  #     volumes:
+  #       - /workspace:/workspace
+  #       - /home/runner/work:/__w
+  #       - /home/runner/work/_temp:/__w/_temp
+  #       - /home/runner/work/_actions:/__w/_actions
+  #       - /home/runner/work/_temp/_github_home:/github/home
+  #       - /home/runner/work/_temp/_github_workflow:/github/workflow
+  #   steps:
+  #     # - name: flutter version
+  #     #   run: flutter --version
+  #     - name: GITHUB_WORKSPACE
+  #       run: echo $GITHUB_WORKSPACE
+
+  #     - name: List files in GITHUB_WORKSPACE
+  #       run: cd $GITHUB_WORKSPACE && ls
+      
+  #     - name: List files in /github/home
+  #       run: cd /github/home && ls
+      
+  #     - name: List files in /home/runner/work/_temp/_github_home
+  #       run: cd /home/runner/work/_temp/_github_home && ls
+  #     - name: List files in /home/runner/work/_temp/_github_workflow
+  #       run: cd /home/runner/work/_temp/_github_workflow && ls
+
+  #     - name: Check for dockerenv file
+  #       run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
+
+
+  compile:
+    name: Compile site assets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      # - name: update local.properties
+      #   run: |
+      #     MY_STRING="sdk.dir=/Android/sdk\n
+      #       flutter.sdk=/flutter\n
+      #       flutter.buildMode=debug\n
+      #       flutter.versionName=1.0.0\n
+      #       flutter.targetSdkVersion=31\n
+      #       flutter.compileSdkVersion=33\n"
+      #     echo "$MY_STRING"> $GITHUB_WORKSPACE/workspace//android/local.properties
+
+      # - name: write gradle.properties file
+      #   run: |
+      #     MY_STRING="ujetAwsAccessKeyValue= \n
+      #       ujetAwsSecretKeyValue= \n"
+      #     echo "$MY_STRING" > $GITHUB_WORKSPACE/workspace/android/gradle.properties
+
+      # - name: Show file content
+      #   run: |
+      #     pwd
+      #     ls -la
+      #     cat $GITHUB_WORKSPACE/workspace/android/local.properties
+      #     cat $GITHUB_WORKSPACE/workspace/android/gradle.properties
+      - name: List Root/workspace Dir
+        run: |
+          cd workspace && ls
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Pull Base Image
+        run: |
+          docker pull cfrey222/exploratory-things:parent
+      # - name: Run the build process with Docker
+      #   id: docker_run 
+      #   uses: addnab/docker-run-action@v3
+      #   # uses: ./.github/actions/run-docker-image
+      #   with:
+      #     # username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     # password: ${{ secrets.DOCKERHUB_TOKEN }}
+      #     image: cfrey222/exploratory-things:parent
+      #     options: -v ${{ github.workspace }}:/app
+      #     run: |
+      #       flutter pub get
+      #       cd app/workspace && ls
+      #       flutter --version
+      #       patrol --version
+      #       sdkmanager --list_installed
+      #       flutter build apk --debug 
+      #       echo "Build Complete"
+      #       echo "Running PAtrol Build"
+      #       patrol build android --target integration_test/button_test.dart --debug --verbose
+          
+      #     # run: |
+      #     #   flutter pub get
+      #     #   cd app/workspace && ls
+      #     #   flutter --version
+      #     #   patrol --version
+      #     #   sdkmanager --list_installed
+      #     #   flutter build apk --debug
+      #     #   echo "Build Complete"
+      #     #   ls
+      #     #   echo "..."
+      #     #   echo "..."
+      #     #   echo "CD build/app/outputs"
+      #     #   cd build/app/outputs/apk && ls
+      #     #   cd / && app/workspace/test-script.sh
+      #     #   echo "Script Complete"
+      #     # run: |
+      #     #   echo "Running Script"
+      #     #   cd app && ls
+      #     #   workspace/test-script.sh
+      #     #   echo "Script Complete"
+      #     #   ls
+      # - name: List Root Dir
+      #   run: |
+      #     echo "GH Root Listing"
+      #     cd workspace && ls
+      # - name: List Build Dir
+      #   run: |
+      #     echo "GH workspace/build/app/outputs/apk/androidTest/debug Listing"
+      #     cd workspace/build/app/outputs/apk/androidTest/debug && ls
+      - name: execute_test_build
+        run: |
+          workspace/script/browserstack-test-gh.sh ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+
+      # - name: Cat output feedback
+      #   run: |
+      #     cat $GITHUB_WORKSPACE/testScriptOutput.txt
+
+      #  build id 2d2e1197807da725319b5bb3117a5a8009706243
+      # session id 3517656f646b8d76d6ced2000eb1170512bca1c9
+
+      - name: Check Build Status
+        id: browserstack_build_status
+        run: |
+          workspace/script/browserstack-test-gh.sh check_build_status ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }} 1f9116b01f6d88d7da9b94bac6ef4c47bbdddea5
+        # timeout: 60000
+        # interval: 4000
+      # Use the output from the `hello` step
+      - name: List the build status
+        run: |
+          echo "The build status is ==> ${{ steps.browserstack_build_status.outputs.BROWSERSTACK_BUILD_STATUS }}"
+          echo "The build id is ==> ${{ steps.browserstack_build_status.outputs.BUILD_ID }}"
+          echo "The build DEVICE_SESSION_DEVICE_NAME is ==> ${{ steps.browserstack_build_status.outputs.DEVICE_SESSION_DEVICE_NAME }}"
+          echo "The build DEVICE_SESSION_STATUS is ==> ${{ steps.browserstack_build_status.outputs.DEVICE_SESSION_STATUS }}"
+          echo "The build DEVICE_SESSION_ID is ==> ${{ steps.browserstack_build_status.outputs.DEVICE_SESSION_ID }}"
+      - name: Generate Test Report
+        run: |
+          echo "Generating Test Report"
+          workspace/script/browserstack-test-gh.sh generate_test_report ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }} ${{ steps.browserstack_build_status.outputs.BUILD_ID }} ${{ steps.browserstack_build_status.outputs.DEVICE_SESSION_ID }}
+      - name: List test report contents
+        run: |
+          cd workspace/integration_tests/reports && ls
+      - name: Test Summary
+        uses: test-summary/action@v2
+        with:
+          paths: "workspace/integration_tests/reports/**/session_test_report-*.xml"
+        if: always()
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: 1
+          body: |
+            This is a multi-line test comment
+            - With GitHub **Markdown** :sparkles:
+            - Created by [create-or-update-comment][1]
+
+            [1]: https://github.com/peter-evans/create-or-update-comment
+          reactions: '+1'
+
+
+
+# jobs:
+#   hello_world_job:
+#     runs-on: ubuntu-latest
+#     name: A job to say hello
+
+#     steps:
+#       # To use this repository's private action,
+#       # you must check out the repository
+#       - name: Checkout
+#         uses: actions/checkout@v4
+
+#       # ACTION EXAMPLE WORKING
+#       # - name: Hello world action step
+#       #   uses: ./.github/actions/hello-world  # Uses an action in the root directory
+#       #   id: hello
+#       #   with:
+#       #     who-to-greet: 'Yo Yo Ma!'
+#       # # Use the output from the `hello` step
+#       # - name: Get the output time
+#       #   run: echo "The time was ${{ steps.hello.outputs.time }}"
+#       #
+#       #
+#       #
+#       #
+
+#       # - name: Build docker images
+#       #   run: docker build -t flutter_app_playground_image .
+        
+#       # - name: Run tests
+#       #   run: docker run --interactive flutter_app_playground_image ${{ env.INPUT_NAME }}
+
+#       # ## TESTING 2 PART DOCKER IMAGE FLOW ##
+#       # - name: Login to Docker Hub
+#       #   uses: docker/login-action@v3
+#       #   with:
+#       #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+#       #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+#       # - name: Pull Base Image
+#       #   run: |
+#       #     docker pull cfrey222/exploratory-things:parent
+
+#       # - name: Run BrowserStack Tests
+#       #   uses: ./.github/actions/run-docker-image # Uses an action in the root directory
+#       #   id: browserstack_test_run
+#       #   with:
+#       #     BS_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+#       #     BS_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+      
+#       # # Use the output from the `hello` step
+#       # - name: Get the output time
+#       #   if: always()
+#       #   run: echo "The time was ${{ steps.browserstack_test_run.outputs.time }}"
+      
+#       # # Use the output from the `browserstack_test_run` step
+#       # - name: Display Browserstack ID output from the above step
+#       #   if: always()
+#       #   run: echo "The BROWSERSTACK_BUILD_ID is => ${{ steps.browserstack_test_run.outputs.BROWSERSTACK_BUILD_ID }} || BROWSERSTACK_BUILD_MESSAGE is => ${{ steps.browserstack_test_run.outputs.BROWSERSTACK_BUILD_MESSAGE }}"
+
+#       ## TEST USING VOLUMES
+#       # - name: Run BrowserStack Tests
+#       #   uses: ./.github/actions/run-docker-image # Uses an action in the root directory
+#       #   id: browserstack_test_run
+#       #   with:
+#       #     BS_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+#       #     BS_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}

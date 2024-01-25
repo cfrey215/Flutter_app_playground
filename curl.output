@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<testsuites>
+  <testsuite name="com.example.flutter_app_playground.MainActivityTest" tests="1" failures="0" skipped="0" timedout="0" errors="0" time="0" timestamp="0">
+    <properties>
+      <property session_id="3517656f646b8d76d6ced2000eb1170512bca1c9"/>
+      <property devicename="Google Pixel 8"/>
+      <property os="Android"/>
+      <property version="14"/>
+    </properties>
+    <testcase name="runDartTest[button_test counter state is the same after going to Home and switching apps]" classname="com.example.flutter_app_playground.MainActivityTest" result="passed" test_id="3517656f646b8d76d6ced2000eb1170512bca1c9844e5d60" time="0" video_url="https://app-automate.browserstack.com/s3-upload/bs-video-logs-use/s3/3517656f646b8d76d6ced2000eb1170512bca1c9/video-3517656f646b8d76d6ced2000eb1170512bca1c9.mp4#t=0,11"/>
+  </testsuite>
+</testsuites>

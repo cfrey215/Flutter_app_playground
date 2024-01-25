@@ -1,0 +1,19 @@
+# Use a base image with Java and Gradle pre-installed
+FROM gradle:7.5.1-jdk17
+
+# Set environment variables
+ENV KOTLIN_VERSION=1.7.10
+
+# Install the Kotlin Gradle plugin
+RUN gradle -v && \
+    gradle -q wrapper --gradle-version ${KOTLIN_VERSION}
+
+# Set working directory
+WORKDIR /app
+
+# # Copy your Gradle build files into the container
+# COPY build.gradle settings.gradle /app/
+# COPY src /app/src
+
+# # Execute the Gradle build command
+# RUN gradle build

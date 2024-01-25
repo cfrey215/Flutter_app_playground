@@ -31,6 +31,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+/workspace/build
 
 # Symbolication related
 app.*.symbols
@@ -38,9 +39,10 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
+
 # Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+workspace/android/app/debug
+workspace/android/app/profile
+workspace/android/app/release
 
 .env

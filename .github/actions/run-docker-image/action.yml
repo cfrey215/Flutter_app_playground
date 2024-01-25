@@ -1,0 +1,32 @@
+# action.yml
+name: 'Hello World'
+description: 'Greet someone and record the time'
+inputs:
+  # who-to-greet:  # id of input
+  #   description: 'Who to greet'
+  #   required: true
+  #   default: 'World'
+  BS_USERNAME:
+    description: 'broswerstack username'
+    required: true
+    default: ''  
+  BS_ACCESS_KEY:
+    description: 'browserstack access key'
+    required: true
+    default: ''
+outputs:
+  #  time: # id of output
+    # description: 'The time we greeted you'
+  BROWSERSTACK_BUILD_ID:
+    description: 'Build Id of the browserstack run'
+  BROWSERSTACK_BUILD_MESSAGE:
+    description: 'Build message of the browserstack run'
+  time:
+    description: "time"
+runs:
+  using: 'docker'
+  image: '../../../Dockerfile'
+  args: 
+    # - ${{ inputs.who-to-greet }}
+    - ${{ inputs.BS_USERNAME }}
+    - ${{ inputs.BS_ACCESS_KEY }}

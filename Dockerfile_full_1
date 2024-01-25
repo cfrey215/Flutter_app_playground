@@ -1,0 +1,120 @@
+FROM node:16.20 AS node_base
+
+FROM ubuntu:20.04 as base_installation_android
+
+# Install Node.js via copy from node_base image
+COPY --from=node_base /usr/local/bin /usr/local/bin
+
+ARG APP_VERSION="1.0.0"
+
+ENV JAVA_VERSION="17" \
+    ANDROID_SDK_TOOLS=10406996 \
+    ANDROID_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_TOOLS}_latest.zip" \
+    ANDROID_VERSION="33" \
+    ANDROID_BUILD_TOOLS_VERSION="33.0.2" \
+    ANDROID_ARCHITECTURE="x86_64" \
+    FLUTTER_CHANNEL="stable" \
+    FLUTTER_VERSION="3.13.6" \
+    FLUTTER_WEB_PORT="8090" \
+    FLUTTER_DEBUG_PORT="42000" \
+    FLUTTER_EMULATOR_NAME="flutter_emulator"
+
+# install all dependencies
+RUN apt-get update \
+&& DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends \
+  openjdk-$JAVA_VERSION-jdk \
+  jq \
+  curl \
+  unzip \
+  zip \
+  sed \
+  git \
+  bash \
+  xz-utils \
+  libglvnd0 \
+  ssh \
+  xauth \
+  x11-xserver-utils \
+  libpulse0 \
+  libxcomposite1 \
+  libgl1-mesa-glx sudo \
+&& rm -rf /var/lib/{apt,dpkg,cache,log}
+
+# INSTALL ANDROID
+ENV ANDROID_HOME=/Android
+ENV FLUTTER_URL="https://storage.googleapis.com/flutter_infra_release/releases/$FLUTTER_CHANNEL/linux/flutter_linux_$FLUTTER_VERSION-$FLUTTER_CHANNEL.tar.xz"
+ENV PATH="$ANDROID_HOME/cmdline-tools/tools/bin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/platforms:$FLUTTER_HOME/bin:$PATH"
+
+# android sdk
+ENV ANDROID_SDK_ROOT="$ANDROID_HOME/sdk"
+ENV COMMAND_LINE_HOME="$ANDROID_HOME/cmdline-tools/latest"
+RUN mkdir -p ${COMMAND_LINE_HOME}
+
+RUN mkdir -p .android && touch .android/repositories.cfg
+ARG ANDROID_BUILD_TOOLS_VERSION=30.0.3
+ARG ANDROID_SDK_PLATFORM_TOOLS_VERSION=34.0.4
+ARG ANDROID_SDK_COMMANDLINE_TOOLS_VERSION=9.0
+ARG ANDROID_PLATFORM_VERSION="android-29"
+
+RUN curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_TOOLS}_latest.zip \
+&& unzip sdk-tools.zip \
+&& rm sdk-tools.zip
+
+RUN mv ./cmdline-tools/bin ${COMMAND_LINE_HOME} \
+&& mv ./cmdline-tools/lib ${COMMAND_LINE_HOME}
+RUN cd $COMMAND_LINE_HOME/bin && yes | ./sdkmanager --licenses
+RUN cd $COMMAND_LINE_HOME/bin && ./sdkmanager "build-tools;$ANDROID_BUILD_TOOLS_VERSION" "platform-tools" "platforms;$ANDROID_PLATFORM_VERSION" "sources;$ANDROID_PLATFORM_VERSION"
+ENV PATH "$PATH:$ANDROID_SDK_ROOT/platform-tools"
+
+RUN mkdir -p $USER/.android \
+&& touch $USER/.android/repositories.cfg \
+&& ${COMMAND_LINE_HOME}/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --update
+
+FROM base_installation_android as base_installation_flutter
+
+######## Install & Setup Flutter ########
+ENV FLUTTER_HOME=/flutter \
+    PATH=$PATH:/flutter/bin
+
+RUN git config --global --add safe.directory /flutter
+
+RUN curl -o flutter.tar.xz $FLUTTER_URL \
+&& mkdir -p $FLUTTER_HOME \
+&& tar xf flutter.tar.xz -C / \
+&& rm flutter.tar.xz \
+&& flutter config --no-analytics --enable-web  --android-sdk ${ANDROID_SDK_ROOT}/ \
+&& flutter precache 
+# && flutter update-packages
+
+# Run basic check to download Dart SDK
+RUN flutter doctor
+
+COPY entrypoint2.sh /entrypoint2.sh
+COPY  /workspace /workspace
+
+RUN dir
+
+# RUN dart pub global activate patrol_cli 2.2.2
+
+ENV PATH=$PATH:/root/.pub-cache/bin
+
+RUN no "n" | patrol --version
+
+
+# ######## Update local.properties ########
+# RUN touch $APP_PATH/android/local.properties \
+# && echo "sdk.dir=$ANDROID_HOME/sdk\n" \
+# "flutter.sdk=$FLUTTER_HOME\n" \
+# "flutter.buildMode=debug\n" \
+# "flutter.versionName=$APP_VERSION\n" \
+# "flutter.targetSdkVersion=31\n" \
+# "flutter.compileSdkVersion=33\n" \
+# >> $APP_PATH/android/local.properties
+
+# ######## Write gradle.properties file ########
+# RUN echo "ujetAwsAccessKeyValue= \n" \
+# "ujetAwsSecretKeyValue= " >> $APP_PATH/android/gradle.properties
+
+# Command to execute when the container starts
+ENTRYPOINT ["/entrypoint2.sh"]
+# ENTRYPOINT [ "/bin/bash", "-c", "exec $GITHUB_WORKSPACE/workspace/script/browserstack-test-gh.sh \"${@}\"", "--"]
