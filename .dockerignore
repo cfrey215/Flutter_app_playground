@@ -5,17 +5,24 @@
 # workspace/.flutter-plugins-dependencies
 workspace/.env
 workspace/build
+workspace/.flutter-plugins
+workspace/.flutter-plugins-dependencies
 
 # Android related // commenting out some of these so that appcenter will build https://github.com/flutter/flutter/issues/17197
 # **/android/**/gradle-wrapper.jar
-# **/android/.gradle
+workspace/android/.gradle
 workspace/android/captures/
-# **/android/gradlew
-# **/android/gradlew.bat
-# **/android/local.properties
-# **/android/**/GeneratedPluginRegistrant.java
-# **/android/keystore.properties
-# **/android/.properties
+# workspace/android/gradlew
+# workspace/android/gradlew.bat
+workspace/android/**/GeneratedPluginRegistrant.java
+workspace/android/keystore.properties
+workspace/android/.properties
+workspace/.dart_tool
+workspace/android/.gradle
+workspace/android/.idea
+workspace/android/build
+workspace/android/local.properties
+workspace/build
 
 
 workspace/ios
@@ -23,3 +30,37 @@ workspace/macos
 workspace/linux
 workspace/windows
 workspace/web
+
+# packages file containing multi-root paths
+.packages.generated
+
+# Flutter/Dart/Pub related
+**/doc/api/
+*.fvm
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+flutter_*.png
+linked_*.ds
+unlinked.ds
+unlinked_spec.ds
+**/lib/generated_plugin_registrant.dart
+**/untranslated.json
+
+# Android related // commenting out some of these so that appcenter will build https://github.com/flutter/flutter/issues/17197
+# **/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+# **/android/gradlew
+# **/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/keystore.properties
+**/android/.properties
+# *.jks
+
+.devcontainer/**

@@ -27,7 +27,7 @@ samples, guidance on mobile development, and a full API reference.
 2./ Upload the AUT to Browserstack:
 
     ```
-    curl -u "christopherfrey_er3Xts:TwysCPG4XyHsnkhZM3H5" \
+    curl -u "<BS_USERNAME>:<BS_ACCESSKEY>" \
     -X POST "https://api-cloud.browserstack.com/app-automate/flutter-integration-tests/v2/android/app" \
     -F "file=@/Users/christopher.frey//development/learning/flutter_app_playground/build/app/outputs/apk/debug/app-debug.apk" \
     -F "custom_id=GoDrive_Test_App"
@@ -46,7 +46,7 @@ samples, guidance on mobile development, and a full API reference.
 2. Upload the Test Suite APK to Browserstack
 
     ```
-    curl -u "christopherfrey_er3Xts:TwysCPG4XyHsnkhZM3H5" \
+    curl -u "<BS_USERNAME>:<BS_ACCESSKEY>" \
     -X POST "https://api-cloud.browserstack.com/app-automate/flutter-integration-tests/v2/android/test-suite" \
     -F "file=@/Users/christopher.frey//development/learning/flutter_app_playground/build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
     ```
@@ -57,7 +57,7 @@ samples, guidance on mobile development, and a full API reference.
 #### Run Browserstack Test suite
 
 ```
-curl -u "christopherfrey_er3Xts:TwysCPG4XyHsnkhZM3H5" \
+curl -u "<BS_USERNAME>:<BS_ACCESSKEY>" \
 -X POST "https://api-cloud.browserstack.com/app-automate/flutter-integration-tests/v2/android/build" \
 -d '{
   "app": "bs://j3c874f21852ea50957a3fdc33f47514288c4ba4", \
@@ -72,3 +72,21 @@ curl -u "christopherfrey_er3Xts:TwysCPG4XyHsnkhZM3H5" \
 }' \
 -H "Content-Type: application/json"
 ```
+
+# Github -> slack usernames
+
+Used for notifying the user who made a change when their build has failed
+ 
+Steps:
+1. Retrieve the Slack Member ID from the Workspace Directory in Slack. Note that the Member ID is workspace specific!
+
+Here's an article on how this can be done. 
+
+https://medium.com/@moshfeu/how-to-find-my-member-id-in-slack-workspace-d4bba942e38c
+
+2. Add the GITHUB ID and the Slack Member ID in the slack.json file in this repository in the format below:
+
+{
+    "github": "githubUserID",
+    "slack": "slackMemberID"
+}

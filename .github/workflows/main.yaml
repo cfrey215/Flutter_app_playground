@@ -1,0 +1,319 @@
+on:
+  pull_request:
+    types: 
+      - opened
+      - reopened
+      - synchronize
+      - labeled
+      - unlabeled
+    paths:
+      - '**'
+  push:
+    branches:
+      - '*'
+    
+env:
+  INPUT_NAME: "chrisman"
+  BS_LOCAL_IDENTIFIER: "bs-id-${{ github.event.number }}"
+  PR_NUMBER: ${{ github.event.pull_request.number }}
+  BS_PROJECT_NAME: "flutter_app_playground-Patrol-2.2.5"
+  BS_LOCAL_TESTING: "false"
+  GH_EVENT_OBJECT: $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+  BS_RUNNING_BADGE: https://img.shields.io/badge/BROWSERSTACK%20TEST%20STATUS-RUNNING-47A2FF?style=for-the-badge
+  BS_SUCCESS_BADGE: https://img.shields.io/badge/BROWSERSTACK%20TEST%20STATUS-PASSED-3fb950?style=for-the-badge
+  BS_FAILURE_BADGE: https://img.shields.io/badge/BROWSERSTACK%20TEST%20STATUS-FAILED-FF3333?style=for-the-badge
+  BS_TIMEOUT_BADGE: https://img.shields.io/badge/BROWSERSTACK%20TEST%20STATUS-TIMED%20OUT-FFFF47?style=for-the-badge
+  BS_NOTRUN_BADGE: https://img.shields.io/badge/BROWSERSTACK%20TEST%20STATUS-NOT%20RUN-FF47FF?style=for-the-badge
+  ACTION_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+  TEST_RUN_STATE: 'not-started'
+  TEST_DEVICE_ARRAY: '["Google Pixel 8-14.0"]'
+  TEST_RUN_TIMEOUT_MINUTES: 30
+  STATUS_CHECK_INTERVAL_SECONDS: 10
+  SLACK_CHANNEL_ID: 'C06F5R3RGRK'
+
+jobs:
+  run_browserstack_tests:
+    name: Run Browserstack Tests
+    runs-on: ubuntu-latest
+    permissions:
+      write-all
+    steps:
+      - name: Outputs
+        run: |
+          echo "The BS_LOCAL_IDENTIFIER is ${{ env.BS_LOCAL_IDENTIFIER }}"
+          echo "The PR_NUMBER is ${{ env.PR_NUMBER }}"
+          echo "Other Number ==> ${{ env.GH_EVENT_OBJECT }}"
+
+      # - name: Get branch names.
+      #   id: branch-names
+      #   uses: tj-actions/branch-names@v8
+
+      # # - name: Running on the default branch.
+      # #   if: steps.branch-names.outputs.is_default == 'true'
+      # #   run: |
+      # #     echo "Running on default: ${{ steps.branch-names.outputs.current_branch }}"
+      # #   # Outputs: "Running on default: main"
+
+      # - name: Running on a pull request branch.
+      #   id: get_pr_data
+      #   if: steps.branch-names.outputs.is_default == 'false'
+      #   run: |
+      #     echo "Running on pr: ${{ steps.branch-names.outputs.current_branch }}"
+      #     echo "BRANCH_NAME=${{ steps.branch-names.outputs.current_branch }}" >> "$GITHUB_OUTPUT"
+      #   # Outputs: "Running on pr: feature/test"
+
+      # # - name: Running on a pull request branch.
+      # #   if: steps.branch-names.outputs.is_default == 'false'
+      # #   run: |
+      # #     echo "Base branch: ${{ steps.branch-names.outputs.base_ref_branch }}"
+      # #   # Outputs: "Base branch: main"
+
+      - uses: actions/github-script@v7
+        id: get_pr_data
+        with:
+          script: |
+              return (
+                await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                  commit_sha: context.sha,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                })
+              ).data[0];
+
+      - name: Pull Request data
+        id: pr_data
+        run: |
+          echo '${{ fromJson(steps.get_pr_data.outputs.result).number }}'
+          echo '${{ fromJson(steps.get_pr_data.outputs.result).title }}'
+          echo '${{ fromJson(steps.get_pr_data.outputs.result).pull_request.head.url }}'
+          echo "BRANCH_NAME=${{ fromJson(steps.get_pr_data.outputs.result).title }}" >> "$GITHUB_OUTPUT"
+          echo "PR_URL=https://github.com/cfrey215/Flutter_app_playground/pull/${{ fromJson(steps.get_pr_data.outputs.result).number }}" >> "$GITHUB_OUTPUT"
+
+      - name: Create comment
+        id: create_comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ fromJson(steps.get_pr_data.outputs.result).number }}
+          body: |
+            Building the app and preparing to run BrowserStack test suite, check back here for results...
+          reactions: 'rocket'
+  
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Parse Slack Username
+        id: parse_slack
+        run: |
+          echo "SLACK_NAME=$(jq '.users[] | select(.github == "${{ github.actor }}").slack' .github/scripts/slack.json | sed -r 's/["]+//g')" >> "$GITHUB_OUTPUT"
+
+      - name: Output Slack Username
+        run: |
+          echo "SLACK_NAME=${{ steps.parse_slack.outputs.SLACK_NAME }}"
+  
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Pull Base Image
+        run: |
+          docker pull cfrey222/exploratory-things:parent
+
+      - name: Run the build process with Docker
+        id: docker_run 
+        uses: addnab/docker-run-action@v3
+        with:
+          image: cfrey222/exploratory-things:parent
+          options: -v ${{ github.workspace }}:/app
+          run: |
+            flutter pub get
+            cd app/workspace && ls
+            echo " "
+            cd script && ls
+            cd ..
+            flutter build apk --debug 
+            echo "Build Complete"
+            cd /
+            echo " "
+            echo "Running Patrol Build"
+            app/workspace/script/browserstack-test-gh.sh build_apps ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+
+      - name: Upload Application Under Test
+        id: upload_aut
+        run: |
+          echo "Current Directory is: $PWD"
+          workspace/script/browserstack-test-gh.sh upload_aut_app ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+  
+      - name: Upload Test Suite App
+        id: upload_test_suite
+        run: |
+          workspace/script/browserstack-test-gh.sh upload_test_app ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+    
+      - name: Run Browserstack Test Suite
+        id: run_browserstack_tests
+        run: |
+          echo "TEST_RUN_STATE=running_test_suite" >> $GITHUB_ENV
+          workspace/script/browserstack-test-gh.sh execute_test_run ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }} ${{ steps.upload_aut.outputs.BS_APP_URL }} ${{ steps.upload_test_suite.outputs.BS_TEST_SUITE_URL }} ${{ env.BS_PROJECT_NAME }} ${{ env.TEST_DEVICE_ARRAY }} ${{ env.BS_LOCAL_TESTING}}
+
+      - name: Update comment:running
+        env:
+          BS_BUILD_LINK: "https://app-automate.browserstack.com/dashboard/v2/builds/${{ steps.run_browserstack_tests.outputs.BROWSERSTACK_BUILD_ID }}"
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.create_comment.outputs.comment-id }}
+          body: |
+            [![badge]]([url])
+
+            Check back here for results...
+            
+            [badge]: ${{ env.BS_RUNNING_BADGE }}
+            [url]: ${{ env.BS_BUILD_LINK }}
+          edit-mode: replace
+          reactions: 'rocket'
+          
+      - name: Check Build Status
+        id: browserstack_build_status
+        run: |
+          workspace/script/browserstack-test-gh.sh check_build_status ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }} ${{ steps.run_browserstack_tests.outputs.BROWSERSTACK_BUILD_ID }} ${{ env.TEST_RUN_TIMEOUT_MINUTES }} ${{ env.STATUS_CHECK_INTERVAL_SECONDS }}
+
+      - name: report setup
+        id: report_setup
+        if: always()
+        run: |
+          if [ "${{ env.TEST_RUN_STATE}}" == "test_run_complete" ]; then
+            if [ "${{ steps.browserstack_build_status.outputs.BROWSERSTACK_BUILD_STATUS }}" == "passed" ]; then
+              echo "test-badge=${{ env.BS_SUCCESS_BADGE }}" >> $GITHUB_OUTPUT
+              echo "status-emoji=hooray" >> $GITHUB_OUTPUT
+              echo "slack-message=<${{ steps.pr_data.outputs.PR_URL }}|${{ steps.pr_data.outputs.BRANCH_NAME }}>\n:checked: Browserstack Test Run has PASSED!\n\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_CASES || 0 }} Total Tests\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_PASSED || 0}} tests passed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_FAILED || 0}} tests failed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_SKIPPED || 0}} tests skipped" >> $GITHUB_OUTPUT
+              echo "testRunStatusDisplay=ALL TESTS HAVE PASSED" >> $GITHUB_OUTPUT
+            elif [ "${{ steps.browserstack_build_status.outputs.BROWSERSTACK_BUILD_STATUS }}" == "timedout" ]; then
+              echo "test-badge=${{ env.BS_TIMEOUT_BADGE }}" >> $GITHUB_OUTPUT
+              echo "status-emoji=-1" >> $GITHUB_OUTPUT
+              echo "slack-message=<${{ steps.pr_data.outputs.PR_URL }}|${{ steps.pr_data.outputs.BRANCH_NAME }}>\n:x: Browserstack Test Run has Timed Out!\n\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_CASES || 0 }} Total Tests\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_PASSED || 0}} tests passed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_FAILED || 0}} tests failed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_SKIPPED || 0}} tests skipped" >> $GITHUB_OUTPUT
+              echo "testRunStatusDisplay=TEST RUN HAS TIMED OUT" >> $GITHUB_OUTPUT
+            else
+              echo "test-badge=${{ env.BS_FAILURE_BADGE }}" >> $GITHUB_OUTPUT
+              echo "status-emoji=-1" >> $GITHUB_OUTPUT
+              echo "slack-message=<${{ steps.pr_data.outputs.PR_URL }}|${{ steps.pr_data.outputs.BRANCH_NAME }}>\n:x: Browserstack Test Run has FAILED!\n\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_CASES || 0 }} Total Tests\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_PASSED || 0}} tests passed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_FAILED || 0}} tests failed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_SKIPPED || 0}} tests skipped" >> $GITHUB_OUTPUT
+              echo "testRunStatusDisplay=SOME TESTS HAVE FAILED" >> $GITHUB_OUTPUT
+            fi
+            echo "pr-comment-url=${{ steps.run_browserstack_tests.outputs.BROWSERSTACK_BUILD_URL }}" >> $GITHUB_OUTPUT
+            echo "pr-comment-body=View BrowserStack results [here][url]." >> $GITHUB_OUTPUT
+          else
+            echo "test-badge=${{ env.BS_NOTRUN_BADGE }}" >> $GITHUB_OUTPUT
+            echo "status-emoji=-1" >> $GITHUB_OUTPUT
+            echo "pr-comment-url=${{ env.ACTION_URL  }}" >> $GITHUB_OUTPUT
+            echo "pr-comment-body=View the CI Action [here][url]." >> $GITHUB_OUTPUT
+            echo "testRunStatusDisplay=A PIPELINE ERROR HAS OCCURRED" >> $GITHUB_OUTPUT
+          fi
+        # echo "test-summary=$(cat test-summary.md)" >> $GITHUB_OUTPUT
+        # if [ "${{ steps.browserstack_build_status.outputs.BROWSERSTACK_BUILD_STATUS }}" == "passed" ]; then
+        #   echo "test-badge=${{ env.BS_SUCCESS_BADGE }}" >> $GITHUB_OUTPUT
+        #   echo "status-emoji=hooray" >> $GITHUB_OUTPUT
+        #   echo "slack-message=<${{ steps.pr_data.outputs.PR_URL }}|${{ steps.pr_data.outputs.BRANCH_NAME }}>\n:checked: Browserstack Test Run has ${{ steps.browserstack_build_status.outputs.BROWSERSTACK_BUILD_STATUS }}!\n\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_CASES || 0 }} Total Tests\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_PASSED || 0}} tests passed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_FAILED || 0}} tests failed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_SKIPPED || 0}} tests skipped" >> $GITHUB_OUTPUT
+        # elif [ "${{ steps.browserstack_build_status.outputs.BROWSERSTACK_BUILD_STATUS }}" == "timeout" ]; then
+        #   echo "test-badge=${{ env.BS_TIMEOUT_BADGE }}" >> $GITHUB_OUTPUT
+        #   echo "status-emoji=-1" >> $GITHUB_OUTPUT
+        #   echo "slack-message=<${{ steps.pr_data.outputs.PR_URL }}|${{ steps.pr_data.outputs.BRANCH_NAME }}>\n:x: Browserstack Test Run has ${{ steps.browserstack_build_status.outputs.BROWSERSTACK_BUILD_STATUS }}!\n\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_CASES || 0 }} Total Tests\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_PASSED || 0}} tests passed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_FAILED || 0}} tests failed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_SKIPPED || 0}} tests skipped" >> $GITHUB_OUTPUT
+        # else
+        #   echo "test-badge=${{ env.BS_FAILURE_BADGE }}" >> $GITHUB_OUTPUT
+        #   echo "status-emoji=-1" >> $GITHUB_OUTPUT
+        #   echo "slack-message=<${{ steps.pr_data.outputs.PR_URL }}|${{ steps.pr_data.outputs.BRANCH_NAME }}>\n:x: Browserstack Test Run has ${{ steps.browserstack_build_status.outputs.BROWSERSTACK_BUILD_STATUS }}!\n\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_CASES || 0 }} Total Tests\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_PASSED || 0}} tests passed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_FAILED || 0}} tests failed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_SKIPPED || 0}} tests skipped" >> $GITHUB_OUTPUT
+        # fi
+
+      - name: Update comment
+        uses: peter-evans/create-or-update-comment@v4
+        if: always()
+        with:
+          comment-id: ${{ steps.create_comment.outputs.comment-id }}
+          body: |
+            [![badge]]([url])
+
+            ${{ steps.report_setup.outputs.testRunStatusDisplay }}
+
+            ${{ steps.report_setup.outputs.pr-comment-body }}
+
+            [badge]: ${{ steps.report_setup.outputs.test-badge }}
+            [url]: ${{ steps.report_setup.outputs.pr-comment-url }}
+          reactions: |
+            ${{ steps.report_setup.outputs.status-emoji }}
+          edit-mode: replace
+
+      - name: Action Failed Notification
+        id: action_failed_slack
+        uses: slackapi/slack-github-action@v1.25.0
+        if: ${{ failure() }}
+        with:
+          channel-id: ${{ env.SLACK_CHANNEL_ID}}
+          payload: |
+            {
+              "text": "GitHub Action failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "<${{ steps.pr_data.outputs.PR_URL }}|${{ steps.pr_data.outputs.BRANCH_NAME}}>\n:warning: run_browserstack_tests Github Action has encountered an error.\n"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": ":x: Click to View failed Action"
+                      },
+                      "url": "${{ env.ACTION_URL }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+    
+      - name: Test Summary Notification
+        id: test_summary_slack
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          channel-id: ${{ env.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text": "Browserstack Test Summary for branch ${{ steps.pr_data.outputs.BRANCH_NAME }}",
+              "callback_id": "sample-browserstack-tests",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "${{ steps.report_setup.outputs.slack-message }}"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": ":github: Click to View the PR"
+                      },
+                      "url": "${{ steps.pr_data.outputs.PR_URL }}"
+                    },
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": ":browserstack: Click to View Test Results"
+                      },
+                      "url": "${{ steps.run_browserstack_tests.outputs.BROWSERSTACK_BUILD_URL }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
