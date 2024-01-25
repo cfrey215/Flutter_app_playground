@@ -1,154 +1,30 @@
-FROM node:16.20 AS node_base
-
-RUN echo "NODE Version:" && node --version
-RUN echo "NPM Version:" && npm --version
+# Dockerfile
 
 FROM ubuntu:20.04
 
-COPY --from=node_base /usr/local/bin /usr/local/bin
-
-ARG BS_USERNAME
-ARG BS_ACCESS_TOKEN
-
-ENV UID=1000
-ENV GID=1000
-ENV USER="developer"
-ENV JAVA_VERSION="17"
-# ENV ANDROID_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip"
-ENV ANDROID_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip"
-ENV ANDROID_VERSION="33"
-ENV ANDROID_BUILD_TOOLS_VERSION="33.0.2"
-ENV ANDROID_ARCHITECTURE="x86_64"
-ENV ANDROID_SDK_ROOT="/home/$USER/android"
-ENV BS_ACCESS_TOKEN=$BS_ACCESS_TOKEN
-ENV env_var_name=$var_name
-ENV FLUTTER_CHANNEL="stable"
-ENV FLUTTER_VERSION="3.13.5"
-ENV FLUTTER_URL="https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.13.5-stable.tar.xz"
-# ENV FLUTTER_URL="https://storage.googleapis.com/flutter_infra/releases/$FLUTTER_CHANNEL/linux/flutter_linux_$FLUTTER_VERSION-$FLUTTER_CHANNEL.tar.xz"
-ENV FLUTTER_HOME="/home/$USER/flutter"
-ENV FLUTTER_WEB_PORT="8090"
-ENV FLUTTER_DEBUG_PORT="42000"
-ENV FLUTTER_EMULATOR_NAME="flutter_emulator"
-ENV PATH="$ANDROID_SDK_ROOT/cmdline-tools/tools/bin:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/platforms:$FLUTTER_HOME/bin:$PATH"
-
-# install all dependencies
-ENV DEBIAN_FRONTEND="noninteractive"
-RUN apt-get update \
-  && apt-get install --yes --no-install-recommends \
-    openjdk-$JAVA_VERSION-jdk \
-    jq \
-    curl \
-    unzip \
-    sed \
-    git \
-    bash \
-    xz-utils \
-    libglvnd0 \
-    ssh \
-    xauth \
-    x11-xserver-utils \
-    libpulse0 \
-    libxcomposite1 \
-    libgl1-mesa-glx sudo \
-  && rm -rf /var/lib/{apt,dpkg,cache,log}
-
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+RUN apt update && apt install -y sbcl
 
 # create user
-RUN groupadd --gid $GID $USER \
-  && useradd -s /bin/bash --uid $UID --gid $GID -m $USER \
-  && echo $USER ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USER \
-  && chmod 0440 /etc/sudoers.d/$USER
+# RUN groupadd --gid $GID $USER \
+#   && useradd -s /bin/bash --uid $UID --gid $GID -m $USER \
+#   && echo $USER ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USER \
+#   && chmod 0440 /etc/sudoers.d/$USER
 
-USER $USER
-WORKDIR /home/$USER
+# USER $USER
+# WORKDIR /home/$USER
 
-######## Install & Setup Gradle ########
-RUN curl -L https://services.gradle.org/distributions/gradle-7.5-all.zip
-RUN curl -L https://services.gradle.org/distributions/gradle-7.5-all.zip -o gradle-7.5-all.zip \
-&& unzip gradle-7.5-all.zip \
-&& rm gradle-7.5-all.zip
-RUN mkdir -p .gradle/wrapper/dists/gradle-7.5-all/6qsw290k5lz422uaf8jf6m7co \
-&& mv gradle-7.5 .gradle/wrapper/dists/gradle-7.5-all/6qsw290k5lz422uaf8jf6m7co
-
-# Downloading https://services.gradle.org/distributions/gradle-7.5-all.zip
-# Unzipping /Users/christopher.frey/.gradle/wrapper/dists/gradle-7.5-all/6qsw290k5lz422uaf8jf6m7co/gradle-7.5-all.zip 
-# to 
-# /Users/christopher.frey/.gradle/wrapper/dists/gradle-7.5-all/6qsw290k5lz422uaf8jf6m7co
-
-# ENV GRADLE_HOME=/home/$USER/gradle-7.5
-# ENV PATH=$PATH:$GRADLE_HOME/bin
-
-# android sdk
-RUN mkdir -p Android/sdk/cmdline-tools/latest
-ENV ANDROID_SDK_ROOT="/home/developer/Android/sdk"
-RUN mkdir -p .android && touch .android/repositories.cfg
-ARG ANDROID_BUILD_TOOLS_VERSION=33.0.2
-ARG ANDROID_SDK_PLATFORM_TOOLS_VERSION=34.0.4
-ARG ANDROID_SDK_COMMANDLINE_TOOLS_VERSION=9.0
-ARG ANDROID_PLATFORM_VERSION="android-33"
-
-RUN curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip \
-&& unzip sdk-tools.zip \
-&& rm sdk-tools.zip
-RUN mv ./cmdline-tools/bin ./Android/sdk/cmdline-tools/latest \
-&& mv ./cmdline-tools/lib ./Android/sdk/cmdline-tools/latest
-
-# RUN cp -r ./cmdline-tools/. ./Android/sdk/cmdline-tools/latest
-
-RUN cd ./Android/sdk/cmdline-tools/latest/bin && yes | ./sdkmanager --licenses
-RUN cd ./Android/sdk/cmdline-tools/latest/bin && ./sdkmanager "build-tools;33.0.2" "platform-tools" "platforms;android-33" "sources;android-33"
-ENV PATH "$PATH:$ANDROID_SDK_ROOT/platform-tools"
-
-# RUN mkdir -p $ANDROID_SDK_ROOT \
-#   && mkdir -p /home/$USER/.android \
-#   && touch /home/$USER/.android/repositories.cfg \
-#   && curl -o android_tools.zip $ANDROID_TOOLS_URL \
-#   && unzip -qq -d "$ANDROID_SDK_ROOT" android_tools.zip \
-#   && rm android_tools.zip \
-#   && mkdir -p $ANDROID_SDK_ROOT/cmdline-tools/tools \
-#   && mv $ANDROID_SDK_ROOT/cmdline-tools/bin $ANDROID_SDK_ROOT/cmdline-tools/tools \
-#   && mv $ANDROID_SDK_ROOT/cmdline-tools/lib $ANDROID_SDK_ROOT/cmdline-tools/tools \
-#   && yes "y" | sdkmanager "build-tools;$ANDROID_BUILD_TOOLS_VERSION" \
-#   && yes "y" | sdkmanager "platforms;android-$ANDROID_VERSION" \
-#   && yes "y" | sdkmanager "platform-tools" \
-#   && yes "y" | sdkmanager "emulator" \
-#   && yes "y" | sdkmanager "system-images;android-$ANDROID_VERSION;google_apis_playstore;$ANDROID_ARCHITECTURE"
-
-
-######## Install & Setup Flutter ########
-RUN curl -o flutter.tar.xz $FLUTTER_URL \
-  && mkdir -p $FLUTTER_HOME \
-  && tar xf flutter.tar.xz -C /home/$USER \
-  && rm flutter.tar.xz \
-  && flutter config --no-analytics --enable-web  --android-sdk /home/runner/.android/sdk/ \
-  && flutter precache \
-  && flutter doctor \
-  && flutter update-packages
-#  && yes "y" | flutter doctor --android-licenses
-# && flutter doctor \
-# && flutter emulators --create \
-# && flutter update-packages
-
-ENV PATH "$PATH:/home/developer/flutter/bin"
-   
-# Run basic check to download Dark SDK
-RUN flutter doctor
-
-######## Setup app code ########
 # COPY entrypoint.sh /usr/local/bin/
-COPY --chown=$USER:$GID workspace workspace
+# COPY --chown=$USER:$GID workspace workspace
+ENV myDir="script"
+RUN mkdir -p $myDir
 
-########  Run Pub Get and Install/Setup Patrol CLI ######## 
-RUN cd workspace \
-  && flutter pub get \
-  && dart pub global activate patrol_cli 2.2.2
+# Copy the script to the container
+COPY ./workspace/script/test.sh $myDir
+RUN chmod +x $myDir/test.sh
 
-ENV PATH "$PATH:/home/developer/.pub-cache/bin"
+# Set return environment variable
+ENV RETURNED_VALUE="Test Run Id: 14sd45rsvb65ter4b6er75"
 
-RUN no "n" | patrol --version
-
-WORKDIR /home/$USER/workspace
-
-# ENTRYPOINT [ "/bin/bash", "-c", "exec /home/${USER}/workspace/script/browserstack-test-gh.sh \"${@}\"", "--"]
+# Set the entrypoint to the script with CMD arguments
+# ENTRYPOINT [ "/bin/bash", "-c", "exec ${myDir}/test.sh \"${@}\"", "--"]
+# CMD ["hulk", "batman", "superman"]

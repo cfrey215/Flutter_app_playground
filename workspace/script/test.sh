@@ -7,3 +7,5 @@ arg3=${3}
 echo "Argument 1: $arg1"
 echo "Argument 2: $arg2"
 echo "Argument 3: $arg3"
+
+echo "RETURN_BS_ID=abcdefg123456789" >> "$GITHUB_OUTPUT"
