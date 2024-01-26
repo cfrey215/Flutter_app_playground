@@ -1,0 +1,25 @@
+# Flutter/Dart/Pub related
+# workspace/.metadata
+# workspace/.dart_tool/
+# workspace/.flutter-plugins
+# workspace/.flutter-plugins-dependencies
+workspace/.env
+workspace/build
+
+# Android related // commenting out some of these so that appcenter will build https://github.com/flutter/flutter/issues/17197
+# **/android/**/gradle-wrapper.jar
+# **/android/.gradle
+workspace/android/captures/
+# **/android/gradlew
+# **/android/gradlew.bat
+# **/android/local.properties
+# **/android/**/GeneratedPluginRegistrant.java
+# **/android/keystore.properties
+# **/android/.properties
+
+
+workspace/ios
+workspace/macos
+workspace/linux
+workspace/windows
+workspace/web

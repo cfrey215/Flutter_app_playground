@@ -1,0 +1,15 @@
+com.example.flutter_app_playground.app-jetified-window-1.0.0-beta04-0 /Users/christopher.frey/.gradle/caches/transforms-3/30c9f9e36f76ec2d5a473df3d33e33ff/transformed/jetified-window-1.0.0-beta04/res
+com.example.flutter_app_playground.app-jetified-window-java-1.0.0-beta04-1 /Users/christopher.frey/.gradle/caches/transforms-3/5f7f04b14475a5177c81c0aebd35a1c0/transformed/jetified-window-java-1.0.0-beta04/res
+com.example.flutter_app_playground.app-jetified-core-1.5.0-2 /Users/christopher.frey/.gradle/caches/transforms-3/78ce80e09a213629c1acedc5eeeaf972/transformed/jetified-core-1.5.0/res
+com.example.flutter_app_playground.app-core-1.6.0-3 /Users/christopher.frey/.gradle/caches/transforms-3/9d13f608411ebd1b864ae55bb53a8fcc/transformed/core-1.6.0/res
+com.example.flutter_app_playground.app-jetified-annotation-experimental-1.1.0-4 /Users/christopher.frey/.gradle/caches/transforms-3/eaa9ca6d8aeab4c8cbd4c273a15e4d4e/transformed/jetified-annotation-experimental-1.1.0/res
+com.example.flutter_app_playground.app-debug-5 /Users/christopher.frey/development/learning/flutter_app_playground/workspace/android/app/src/debug/res
+com.example.flutter_app_playground.app-main-6 /Users/christopher.frey/development/learning/flutter_app_playground/workspace/android/app/src/main/res
+com.example.flutter_app_playground.app-pngs-7 /Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/generated/res/pngs/debug
+com.example.flutter_app_playground.app-resValues-8 /Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/generated/res/resValues/debug
+com.example.flutter_app_playground.app-rs-9 /Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/generated/res/rs/debug
+com.example.flutter_app_playground.app-mergeDebugResources-10 /Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/intermediates/incremental/debug/mergeDebugResources/merged.dir
+com.example.flutter_app_playground.app-mergeDebugResources-11 /Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/intermediates/incremental/debug/mergeDebugResources/stripped.dir
+com.example.flutter_app_playground.app-merged_res-12 /Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/intermediates/merged_res/debug
+com.example.flutter_app_playground.app-packaged_res-13 /Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/integration_test/intermediates/packaged_res/debug
+com.example.flutter_app_playground.app-packaged_res-14 /Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/patrol/intermediates/packaged_res/debug

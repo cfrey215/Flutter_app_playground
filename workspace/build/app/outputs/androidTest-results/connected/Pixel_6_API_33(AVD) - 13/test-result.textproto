@@ -1,0 +1,24 @@
+# 2023-11-29T16:07:59.249Z:
+test_suite_meta_data {
+}
+test_status: ABORTED
+output_artifact {
+  label {
+    label: "test-results.log"
+    namespace: "com.google.testing.platform.runtime.android.driver.AndroidInstrumentationDriver"
+  }
+  source_path {
+    path: "/Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/outputs/androidTest-results/connected/Pixel_6_API_33(AVD) - 13/testlog/test-results.log"
+  }
+  type: TEST_DATA
+  mime_type: "text/plain"
+}
+issue {
+  namespace {
+    namespace: "com.google.testing.platform.runtime.android.driver.AndroidInstrumentationDriver"
+  }
+  severity: SEVERE
+  code: 1
+  name: "INSTRUMENTATION_FAILED"
+  message: "Test run failed to complete. No test results"
+}

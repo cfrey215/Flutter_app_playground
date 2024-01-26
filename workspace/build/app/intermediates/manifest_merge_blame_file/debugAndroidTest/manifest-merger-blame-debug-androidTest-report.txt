@@ -1,0 +1,32 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.example.flutter_app_playground.test" >
+4
+5    <uses-sdk
+5-->/Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest6619947948315695317.xml:5:5-74
+6        android:minSdkVersion="21"
+6-->/Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest6619947948315695317.xml:5:15-41
+7        android:targetSdkVersion="33" />
+7-->/Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest6619947948315695317.xml:5:42-71
+8
+9    <instrumentation
+9-->/Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest6619947948315695317.xml:11:5-15:84
+10        android:name="pl.leancode.patrol.BrowserstackPatrolJUnitRunner"
+10-->/Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest6619947948315695317.xml:11:22-85
+11        android:functionalTest="false"
+11-->/Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest6619947948315695317.xml:14:22-52
+12        android:handleProfiling="false"
+12-->/Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest6619947948315695317.xml:13:22-53
+13        android:label="Tests for com.example.flutter_app_playground"
+13-->/Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest6619947948315695317.xml:15:22-82
+14        android:targetPackage="com.example.flutter_app_playground" />
+14-->/Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest6619947948315695317.xml:12:22-80
+15
+16    <application android:debuggable="true" >
+16-->/Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest6619947948315695317.xml:7:5-9:19
+17        <uses-library android:name="android.test.runner" />
+17-->/Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest6619947948315695317.xml:8:9-60
+17-->/Users/christopher.frey/development/learning/flutter_app_playground/workspace/build/app/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest6619947948315695317.xml:8:23-57
+18    </application>
+19
+20</manifest>
