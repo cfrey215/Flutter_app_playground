@@ -122,6 +122,9 @@ function check_build_apps() {
 
 # Upload AUT App
 function upload_aut_app() {
+    BS_USERNAME=${1}
+    BS_ACCESS_TOKEN=${2}
+
     if [ "$FILES_SUCCESSFULLY_CREATED" = true ]; then
         echo
         echo "==> Upload AUT app to Browserstack…"
@@ -162,6 +165,9 @@ function upload_aut_app() {
 
 # Upload Test App
 function upload_test_app() {
+    BS_USERNAME=${1}
+    BS_ACCESS_TOKEN=${2}
+    
     if [ "$FILES_SUCCESSFULLY_CREATED" = true ]; then
         echo
         echo "==> Upload Test app to Browserstack…"
