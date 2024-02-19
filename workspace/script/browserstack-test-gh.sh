@@ -99,10 +99,12 @@ function build_apps() {
         else
             echo "$filename failed to be created."
             FILES_SUCCESSFULLY_CREATED=false
+            exit 0;
         fi
     done
 
     echo "==> Finished building AUT and Test Apps…"
+    exit 1;
 }
 
 function check_build_apps() { 
@@ -142,14 +144,19 @@ function upload_aut_app() {
             RESPONSE_ERROR=$(cat error.messsages)
             echo -e "Error making Upload AUT app to Browserstack request, http response code: $RESPONSE_CODE)"
             echo "Error message => $RESPONSE_ERROR"
+            exit 0;
         else
             APP_URL=$(echo "$RESPONSE" | jq -r '.app_url')
             echo "APP_URL => $APP_URL"
+            echo "BS_APP_URL=$APP_URL" >> "$GITHUB_OUTPUT"
         fi
     else
         echo
         echo "==> Skipping Upload AUT app to Browserstack, app files failed to generate properly."
+        exit 0;
     fi
+
+    exit 1;
 }
 
 # Upload Test App
@@ -178,6 +185,7 @@ function upload_test_app() {
         else
             TEST_SUITE_URL=$(echo "$RESPONSE" | jq -r '.test_suite_url')
             echo "TEST_SUITE_URL => $TEST_SUITE_URL"
+            echo "BS_TEST_SUITE_URL=$TEST_SUITE_URL" >> "$GITHUB_OUTPUT"
         fi
     else
         echo
@@ -187,6 +195,13 @@ function upload_test_app() {
 
 # Execute test run
 function execute_test_run() {
+    BS_USERNAME=${1}
+    BS_ACCESS_TOKEN=${2}
+    APP_URL=${3}
+    TEST_SUITE_URL=${4}
+    BS_PROJECT_NAME=${5} || "flutter_app_playground-Patrol-2.2.5"
+    BS_LOCAL_TESTING=${6} || false
+
     if [ "$FILES_SUCCESSFULLY_CREATED" = true ]; then
         echo
         echo "==> Execute Browserstack test run..."
@@ -223,32 +238,32 @@ function execute_test_run() {
             echo "Error message => $RESPONSE_ERROR"
             BUILD_MESSAGE=Fail
             BUIILD_ID=9999
-            # echo "BROWSERSTACK_BUILD_MESSAGE=failed" >> "$GITHUB_OUTPUT"
-            # echo "BROWSERSTACK_BUILD_ID=0000000" >> "$GITHUB_OUTPUT"
-
-            echo "##[set-output name=BROWSERSTACK_BUILD_MESSAGE]failed"
-            echo "##[set-output name=BROWSERSTACK_BUILD_ID]0000000"
-
-            echo "BROWSERSTACK_BUILD_ID=0000000" >> testScriptOutput.txt
+            echo "BROWSERSTACK_BUILD_MESSAGE=failed" >> "$GITHUB_OUTPUT"
+            echo "BROWSERSTACK_BUILD_ID=0000000" >> "$GITHUB_OUTPUT"
+            exit 0;
+            # echo "##[set-output name=BROWSERSTACK_BUILD_MESSAGE]failed"
+            # echo "##[set-output name=BROWSERSTACK_BUILD_ID]0000000"
+            # echo "BROWSERSTACK_BUILD_ID=0000000" >> testScriptOutput.txt
         else
             BUILD_MESSAGE=$(echo "$RESPONSE" | jq -r '.message')
-            BUIILD_ID=$(echo "$RESPONSE" | jq -r '.build_id')
-            echo "BUILD_MESSAGE => ${BUILD_MESSAGE} || BUIILD_ID => $BUIILD_ID"
-            
-            # echo "BROWSERSTACK_BUILD_MESSAGE=$BUILD_MESSAGE" >> "$GITHUB_OUTPUT"
-            # echo "BROWSERSTACK_BUILD_ID=$BUIILD_ID" >> "$GITHUB_OUTPUT"
-            echo "##[set-output name=BROWSERSTACK_BUILD_MESSAGE]$BUILD_MESSAGE"
-            echo "##[set-output name=BROWSERSTACK_BUILD_ID]$BUIILD_ID"
+            BUILD_ID=$(echo "$RESPONSE" | jq -r '.build_id')
+            echo "BROWSERSTACK_BUILD_ID=$BUILD_ID" >> "$GITHUB_OUTPUT"
+            echo "BROWSERSTACK_BUILD_MESSAGE=$BUILD_MESSAGE" >> "$GITHUB_OUTPUT"
+            exit 1;
 
-            echo "=BROWSERSTACK_BUILD_ID=$BUIILD_ID" >> testScriptOutput.txt
+            # echo "##[set-output name=BROWSERSTACK_BUILD_MESSAGE]$BUILD_MESSAGE"
+            # echo "##[set-output name=BROWSERSTACK_BUILD_ID]$BUIILD_ID"
+            # echo "BROWSERSTACK_BUILD_ID=$BUILD_ID" >> testScriptOutput.txt
         fi
      else
         echo
         echo "==> Skipping Execute Browserstack test run step, app files failed to generate properly."
-        echo "##[set-output name=BROWSERSTACK_BUILD_MESSAGE]failed"
-        echo "##[set-output name=BROWSERSTACK_BUILD_ID]0000000"
-
-        echo "BROWSERSTACK_BUILD_ID=0000000" >> testScriptOutput.txt
+        echo "BROWSERSTACK_BUILD_MESSAGE=failed" >> "$GITHUB_OUTPUT"
+        echo "BROWSERSTACK_BUILD_ID=0000000" >> "$GITHUB_OUTPUT"
+        exit 0;
+        # echo "##[set-output name=BROWSERSTACK_BUILD_MESSAGE]failed"
+        # echo "##[set-output name=BROWSERSTACK_BUILD_ID]0000000"
+        # echo "BROWSERSTACK_BUILD_ID=0000000" >> testScriptOutput.txt
     fi
 }
 
@@ -283,11 +298,11 @@ function check_build_status() {
 
         echo "Check Browserstack build status response code => $RESPONSE_CODE"
         echo "Check Browserstack build status cURL response => $RESPONSE"
-        echo "BUILD_STATUS => $BUILD_STATUS"
 
         if [ "${BUILD_STATUS}" != "running" ] && [ "${BUILD_STATUS}" != "" ] ; then
-            echo "##### FOUND THE BUILD_STATUS => $BUILD_STATUS"
-            echo "DEVICE_SESSION_DEVICE_NAME => $DEVICE_SESSION_DEVICE_NAME"
+            echo " ==> BUILD_ID => $BUILD_ID"
+            echo " ==> BUILD_STATUS => $BUILD_STATUS"
+            echo " ==> DEVICE_SESSION_DEVICE_NAME => $DEVICE_SESSION_DEVICE_NAME"
             echo " ==> DEVICE_SESSION_STATUS => $DEVICE_SESSION_STATUS"
             echo " ==> DEVICE_SESSION_ID => $DEVICE_SESSION_ID"
         fi
@@ -295,11 +310,12 @@ function check_build_status() {
         sleep 5
     done
 
-    # echo "##[set-output name=BROWSERSTACK_BUILD_STATUS]$BUILD_STATUS"
-    echo "BUILD_ID=$BUILD_ID", "BROWSERSTACK_BUILD_STATUS=$BUILD_STATUS", "DEVICE_SESSION_DEVICE_NAME=$DEVICE_SESSION_DEVICE_NAME", "DEVICE_SESSION_STATUS=$DEVICE_SESSION_STATUS", "DEVICE_SESSION_ID=$DEVICE_SESSION_ID" >> "$GITHUB_OUTPUT"
-    # echo "DEVICE_SESSION_DEVICE_NAME=$DEVICE_SESSION_DEVICE_NAME" >> "$GITHUB_OUTPUT"
-    # echo "DEVICE_SESSION_STATUS=$DEVICE_SESSION_STATUS" >> "$GITHUB_OUTPUT"
-    # echo "DEVICE_SESSION_ID=$DEVICE_SESSION_ID" >> "$GITHUB_OUTPUT"
+    # shellcheck disable=SC2129
+    echo "BUILD_ID=$BUILD_ID" >> "$GITHUB_OUTPUT"
+    echo "BROWSERSTACK_BUILD_STATUS=$BUILD_STATUS" >> "$GITHUB_OUTPUT"
+    echo "DEVICE_SESSION_DEVICE_NAME=$DEVICE_SESSION_DEVICE_NAME" >> "$GITHUB_OUTPUT"
+    echo "DEVICE_SESSION_STATUS=$DEVICE_SESSION_STATUS" >> "$GITHUB_OUTPUT"
+    echo "DEVICE_SESSION_ID=$DEVICE_SESSION_ID" >> "$GITHUB_OUTPUT"
 }
 
 function generate_test_run_report() {
@@ -340,7 +356,9 @@ function generate_test_run_report() {
 
     if [ "$RESPONSE_CODE" == "200" ]; then
         echo "Create test report..."
-        echo "$RESPONSE" > "$TEST_REPORT_DIR/session_test_report.xml"
+        echo "$RESPONSE" >> "$TEST_REPORT_DIR/session_test_report.xml"
+
+
 
     #     RESPONSE_ERROR=$(cat error.messsages)
     #     echo -e "Error making Execute Browserstack test run request, http response code: $RESPONSE_CODE)"
@@ -364,7 +382,7 @@ function generate_test_run_report() {
     #     echo "##[set-output name=BROWSERSTACK_BUILD_MESSAGE]$BUILD_MESSAGE"
     #     echo "##[set-output name=BROWSERSTACK_BUILD_ID]$BUIILD_ID"
 
-    #     echo "=BROWSERSTACK_BUILD_ID=$BUIILD_ID" >> testScriptOutput.txt
+    #     echo "BROWSERSTACK_BUILD_ID=$BUIILD_ID" >> testScriptOutput.txt
     fi
 }
 
