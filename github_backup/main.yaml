@@ -9,27 +9,104 @@ on:
     paths:
       - '**'
   push:
-    branches:
-      - '*'
     
 env:
   INPUT_NAME: "chrisman"
   BS_LOCAL_IDENTIFIER: "bs-id-${{ github.event.number }}"
+  BS_PROJECT_NAME: "Bstack Project"
   PR_NUMBER: ${{ github.event.pull_request.number }}
-  BS_PROJECT_NAME: "flutter_app_playground-Patrol-2.2.5"
-  BS_LOCAL_TESTING: "false"
-  GH_EVENT_OBJECT: $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
   
 jobs:
-  run_browserstack_tests:
-    name: Run Browserstack Tests
+  # build:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: update local.properties
+  #       run: |
+  #         MY_STRING="sdk.dir=/Android/sdk \n
+  #           flutter.sdk=/flutter \n
+  #           flutter.buildMode=debug \n
+  #           flutter.versionName=1.0.0"
+  #         echo "$MY_STRING" > $GITHUB_WORKSPACE/workspace/android/local.properties
+
+  #     - name: write gradle.properties file
+  #       run: |
+  #         MY_STRING="ujetAwsAccessKeyValue= \n
+  #           ujetAwsSecretKeyValue= \n"
+  #         echo "$MY_STRING" > $GITHUB_WORKSPACE/workspace/android/gradle.properties
+
+  #     - name: Show file content
+  #       run: |
+  #         pwd
+  #         ls -la
+  #         cat $GITHUB_WORKSPACE/workspace/android/local.properties
+  #         cat $GITHUB_WORKSPACE/workspace/android/gradle.properties
+
+  #     - run: ls -la $GITHUB_WORKSPACE/workspace
+  #     - uses: ./.github/actions/hello-world
+  #       with:
+  #         who-to-greet: 'Yo Yo Ma!'
+  #     - run: ls -la $GITHUB_WORKSPACE
+  #     - run: ls -la $GITHUB_WORKSPACE/workspace
+  #     - run: ls -la /home/runner/work/_temp/_github_home
+  #     # - run: cd $GITHUB_WORKSPACE/workspace && flutter build apk --debug
+  #     # - uses: actions/upload-artifact@v2
+  #     #   with:
+  #     #     name: workspace_artifacts
+  #     #     path: ${{github.workspace}}
+  #     # - uses: actions/upload-artifact@v2
+  #     #   with:
+  #     #     name: home-artifacts
+  #     #     path: /home/runner/work/_temp/_github_home
+
+
+  # container-test-job:
+  #   runs-on: ubuntu-latest
+  #   container:
+  #     image: cfrey222/exploratory-things:parent
+  #     credentials:
+  #       username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #       password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #     env:
+  #       NODE_ENV: development
+  #     ports:
+  #       - 80
+  #     volumes:
+  #       - /workspace:/workspace
+  #       - /home/runner/work:/__w
+  #       - /home/runner/work/_temp:/__w/_temp
+  #       - /home/runner/work/_actions:/__w/_actions
+  #       - /home/runner/work/_temp/_github_home:/github/home
+  #       - /home/runner/work/_temp/_github_workflow:/github/workflow
+  #   steps:
+  #     # - name: flutter version
+  #     #   run: flutter --version
+  #     - name: GITHUB_WORKSPACE
+  #       run: echo $GITHUB_WORKSPACE
+
+  #     - name: List files in GITHUB_WORKSPACE
+  #       run: cd $GITHUB_WORKSPACE && ls
+      
+  #     - name: List files in /github/home
+  #       run: cd /github/home && ls
+      
+  #     - name: List files in /home/runner/work/_temp/_github_home
+  #       run: cd /home/runner/work/_temp/_github_home && ls
+  #     - name: List files in /home/runner/work/_temp/_github_workflow
+  #       run: cd /home/runner/work/_temp/_github_workflow && ls
+
+  #     - name: Check for dockerenv file
+  #       run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
+
+
+  compile:
+    name: Compile site assets
     runs-on: ubuntu-latest
     steps:
       - name: Outputs
         run: |
           echo "The BS_LOCAL_IDENTIFIER is ${{ env.BS_LOCAL_IDENTIFIER }}"
           echo "The PR_NUMBER is ${{ env.PR_NUMBER }}"
-          echo "Other Number ==> ${{ env.GH_EVENT_OBJECT }}"
 
       # - name: Create comment
       #   uses: peter-evans/create-or-update-comment@v4
@@ -95,17 +172,12 @@ jobs:
             patrol --version
             sdkmanager --list_installed
             echo " "
-            cd script && ls
-            cd ..
             flutter build apk --debug 
             echo "Build Complete"
-            cd /
+            cd ../..
             echo " "
-          # echo "Running Patrol Build"
-          # app/workspace/script/browserstack-test-gh.sh build_apps ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
-          
-          
-            # app/workspace/script/browserstack-test-gh.sh build_apps ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+            echo "Running Patrol Build"
+            app/workspace/script/browserstack-test-gh.sh build_apps ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
           
       #     # run: |
       #     #   flutter pub get
@@ -152,7 +224,7 @@ jobs:
       - name: Run Browserstack Test Suite
         id: run_browserstack_tests
         run: |
-          workspace/script/browserstack-test-gh.sh execute_test_run ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }} ${{ steps.upload_aut.outputs.BS_APP_URL }} ${{ steps.upload_test_suite.outputs.BS_TEST_SUITE_URL }} ${{ env.BS_PROJECT_NAME }} ${{ env.BS_LOCAL_TESTING}}
+          workspace/script/browserstack-test-gh.sh execute_test_run ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }} ${{ steps.upload_aut.outputs.BS_APP_URL }} ${{ steps.upload_test_suite.outputs.BS_TEST_SUITE_URL }}
 
       - name: Check Build Status
         id: browserstack_build_status
@@ -204,15 +276,70 @@ jobs:
       #       [1]: https://github.com/peter-evans/create-or-update-comment
       #     reactions: '+1'
 
-      - name: Post to a Slack channel
-        id: slack
-        uses: slackapi/slack-github-action@v1.25.0
-        with:
-          # Slack channel id, channel name, or user id to post message.
-          # See also: https://api.slack.com/methods/chat.postMessage#channels
-          # You can pass in multiple channels to post to by providing a comma-delimited list of channel IDs.
-          channel-id: 'C06F5R3RGRK'
-          # For posting a simple plain text message
-          slack-message: "GitHub build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+
+# jobs:
+#   hello_world_job:
+#     runs-on: ubuntu-latest
+#     name: A job to say hello
+
+#     steps:
+#       # To use this repository's private action,
+#       # you must check out the repository
+#       - name: Checkout
+#         uses: actions/checkout@v4
+
+#       # ACTION EXAMPLE WORKING
+#       # - name: Hello world action step
+#       #   uses: ./.github/actions/hello-world  # Uses an action in the root directory
+#       #   id: hello
+#       #   with:
+#       #     who-to-greet: 'Yo Yo Ma!'
+#       # # Use the output from the `hello` step
+#       # - name: Get the output time
+#       #   run: echo "The time was ${{ steps.hello.outputs.time }}"
+#       #
+#       #
+#       #
+#       #
+
+#       # - name: Build docker images
+#       #   run: docker build -t flutter_app_playground_image .
+        
+#       # - name: Run tests
+#       #   run: docker run --interactive flutter_app_playground_image ${{ env.INPUT_NAME }}
+
+#       # ## TESTING 2 PART DOCKER IMAGE FLOW ##
+#       # - name: Login to Docker Hub
+#       #   uses: docker/login-action@v3
+#       #   with:
+#       #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+#       #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+#       # - name: Pull Base Image
+#       #   run: |
+#       #     docker pull cfrey222/exploratory-things:parent
+
+#       # - name: Run BrowserStack Tests
+#       #   uses: ./.github/actions/run-docker-image # Uses an action in the root directory
+#       #   id: browserstack_test_run
+#       #   with:
+#       #     BS_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+#       #     BS_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+      
+#       # # Use the output from the `hello` step
+#       # - name: Get the output time
+#       #   if: always()
+#       #   run: echo "The time was ${{ steps.browserstack_test_run.outputs.time }}"
+      
+#       # # Use the output from the `browserstack_test_run` step
+#       # - name: Display Browserstack ID output from the above step
+#       #   if: always()
+#       #   run: echo "The BROWSERSTACK_BUILD_ID is => ${{ steps.browserstack_test_run.outputs.BROWSERSTACK_BUILD_ID }} || BROWSERSTACK_BUILD_MESSAGE is => ${{ steps.browserstack_test_run.outputs.BROWSERSTACK_BUILD_MESSAGE }}"
+
+#       ## TEST USING VOLUMES
+#       # - name: Run BrowserStack Tests
+#       #   uses: ./.github/actions/run-docker-image # Uses an action in the root directory
+#       #   id: browserstack_test_run
+#       #   with:
+#       #     BS_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+#       #     BS_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
