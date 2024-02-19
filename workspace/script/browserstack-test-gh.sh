@@ -86,7 +86,8 @@ function testing() {
 
 # Build Apps
 function build_apps() {
-    cd "$GITHUB_WORKSPACE"/workspace || exit
+    # cd "$GITHUB_WORKSPACE"/workspace || exit
+    cd app/workspace || exit
 
     patrol build android \
         --target integration_test/button_test.dart \
