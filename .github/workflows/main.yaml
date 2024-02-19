@@ -91,12 +91,13 @@ jobs:
             sdkmanager --list_installed
             echo " "
             cd script && ls
-            
-          # flutter build apk --debug 
-          # echo "Build Complete"
-          # cd /
-          # echo " "
-          # echo "Running Patrol Build"
+            cd ..
+            flutter build apk --debug 
+            echo "Build Complete"
+            cd /
+            echo " "
+            echo "Running Patrol Build"
+            app/workspace/script/browserstack-test-gh.sh build_apps ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
           # app/workspace/script/browserstack-test-gh.sh build_apps ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
           
       #     # run: |
