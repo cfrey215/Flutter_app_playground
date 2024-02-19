@@ -21,14 +21,14 @@ TEST_SUITE_URL=""
 BS_PROJECT_NAME="flutter_app_playground-Patrol-2.2.5"
 BS_LOCAL_TESTING="false"
 
-echo
-echo "==> -load-env: loading environment…"
+# echo
+# echo "==> -load-env: loading environment…"
 
-BS_USERNAME=${1}
-BS_ACCESS_TOKEN=${2}
+# BS_USERNAME=${1}
+# BS_ACCESS_TOKEN=${2}
 
-echo "BS_USERNAME =====> ${BS_USERNAME}"
-echo "BS_ACCESS_TOKEN =====> ${BS_ACCESS_TOKEN}"
+# echo "BS_USERNAME =====> ${BS_USERNAME}"
+# echo "BS_ACCESS_TOKEN =====> ${BS_ACCESS_TOKEN}"
 
 # if [ -f .env ]; then
 #     # Load .env vars
@@ -210,8 +210,8 @@ function execute_test_run() {
     BS_ACCESS_TOKEN=${2}
     APP_URL=${3}
     TEST_SUITE_URL=${4}
-    BS_PROJECT_NAME=${5} || "flutter_app_playground-Patrol-2.2.5"
-    BS_LOCAL_TESTING=${6} || false
+    BS_PROJECT_NAME=${5}
+    BS_LOCAL_TESTING=${6}
 
     if [ "$FILES_SUCCESSFULLY_CREATED" = true ]; then
         echo
