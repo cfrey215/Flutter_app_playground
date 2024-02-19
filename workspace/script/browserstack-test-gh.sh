@@ -51,12 +51,14 @@ BS_LOCAL_TESTING="false"
 # fi
 
 
-if [[ "${BS_USERNAME}" = "" || "${BS_ACCESS_TOKEN}" = "" ]]; then
-    echo
-    echo "    ERROR: Missing BS_USERNAME or BS_ACCESS_TOKEN, please supply these values in your .env file."
-    echo
-    exit 1;
-fi
+function validate_credentials() {
+    if [[ "${BS_USERNAME}" = "" || "${BS_ACCESS_TOKEN}" = "" ]]; then
+        echo
+        echo "    ERROR: Missing BS_USERNAME or BS_ACCESS_TOKEN, please supply these values in your .env file."
+        echo
+        exit 1;
+    fi
+}
 
 function testing() {
     echo "==> Testing..."
