@@ -90,12 +90,14 @@ jobs:
             patrol --version
             sdkmanager --list_installed
             echo " "
-            flutter build apk --debug 
-            echo "Build Complete"
-            cd /
-            echo " "
-            echo "Running Patrol Build"
-            app/workspace/script/browserstack-test-gh.sh build_apps ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+            cd script && ls
+            
+          # flutter build apk --debug 
+          # echo "Build Complete"
+          # cd /
+          # echo " "
+          # echo "Running Patrol Build"
+          # app/workspace/script/browserstack-test-gh.sh build_apps ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
           
       #     # run: |
       #     #   flutter pub get
