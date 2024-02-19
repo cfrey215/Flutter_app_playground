@@ -148,7 +148,7 @@ function upload_aut_app() {
             RESPONSE_ERROR=$(cat error.messsages)
             echo -e "Error making Upload AUT app to Browserstack request, http response code: $RESPONSE_CODE)"
             echo "Error message => $RESPONSE_ERROR"
-            exit 0;
+            exit 1;
         else
             APP_URL=$(echo "$RESPONSE" | jq -r '.app_url')
             echo "APP_URL => $APP_URL"
@@ -157,17 +157,17 @@ function upload_aut_app() {
     else
         echo
         echo "==> Skipping Upload AUT app to Browserstack, app files failed to generate properly."
-        exit 0;
+        exit 1;
     fi
 
-    exit 1;
+    exit 0;
 }
 
 # Upload Test App
 function upload_test_app() {
     BS_USERNAME=${1}
     BS_ACCESS_TOKEN=${2}
-    
+
     if [ "$FILES_SUCCESSFULLY_CREATED" = true ]; then
         echo
         echo "==> Upload Test app to Browserstack…"
@@ -189,6 +189,7 @@ function upload_test_app() {
             RESPONSE_ERROR=$(cat error.messsages)
             echo -e "Error making Upload Test app to Browserstack request, http response code: $RESPONSE_CODE)"
             echo "Error message => $RESPONSE_ERROR"
+            exit 1;
         else
             TEST_SUITE_URL=$(echo "$RESPONSE" | jq -r '.test_suite_url')
             echo "TEST_SUITE_URL => $TEST_SUITE_URL"
@@ -197,7 +198,10 @@ function upload_test_app() {
     else
         echo
         echo "==> Skipping Upload Test app to Browserstack, app files failed to generate properly."
+        exit 1;
     fi
+
+    exit 0;
 }
 
 # Execute test run
@@ -247,7 +251,7 @@ function execute_test_run() {
             BUIILD_ID=9999
             echo "BROWSERSTACK_BUILD_MESSAGE=failed" >> "$GITHUB_OUTPUT"
             echo "BROWSERSTACK_BUILD_ID=0000000" >> "$GITHUB_OUTPUT"
-            exit 0;
+            exit 1;
             # echo "##[set-output name=BROWSERSTACK_BUILD_MESSAGE]failed"
             # echo "##[set-output name=BROWSERSTACK_BUILD_ID]0000000"
             # echo "BROWSERSTACK_BUILD_ID=0000000" >> testScriptOutput.txt
@@ -256,8 +260,7 @@ function execute_test_run() {
             BUILD_ID=$(echo "$RESPONSE" | jq -r '.build_id')
             echo "BROWSERSTACK_BUILD_ID=$BUILD_ID" >> "$GITHUB_OUTPUT"
             echo "BROWSERSTACK_BUILD_MESSAGE=$BUILD_MESSAGE" >> "$GITHUB_OUTPUT"
-            exit 1;
-
+            
             # echo "##[set-output name=BROWSERSTACK_BUILD_MESSAGE]$BUILD_MESSAGE"
             # echo "##[set-output name=BROWSERSTACK_BUILD_ID]$BUIILD_ID"
             # echo "BROWSERSTACK_BUILD_ID=$BUILD_ID" >> testScriptOutput.txt
@@ -267,11 +270,13 @@ function execute_test_run() {
         echo "==> Skipping Execute Browserstack test run step, app files failed to generate properly."
         echo "BROWSERSTACK_BUILD_MESSAGE=failed" >> "$GITHUB_OUTPUT"
         echo "BROWSERSTACK_BUILD_ID=0000000" >> "$GITHUB_OUTPUT"
-        exit 0;
+        exit 1;
         # echo "##[set-output name=BROWSERSTACK_BUILD_MESSAGE]failed"
         # echo "##[set-output name=BROWSERSTACK_BUILD_ID]0000000"
         # echo "BROWSERSTACK_BUILD_ID=0000000" >> testScriptOutput.txt
     fi
+
+    exit 0;
 }
 
 function check_build_status() {
