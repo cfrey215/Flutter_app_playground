@@ -9,6 +9,8 @@ on:
     paths:
       - '**'
   push:
+    paths:
+      - '**'
     
 env:
   INPUT_NAME: "chrisman"
@@ -16,6 +18,7 @@ env:
   PR_NUMBER: ${{ github.event.pull_request.number }}
   BS_PROJECT_NAME: "flutter_app_playground-Patrol-2.2.5"
   BS_LOCAL_TESTING: "false"
+  GH_EVENT_OBJECT: ${{ github.event }}
   
 jobs:
   run_browserstack_tests:
