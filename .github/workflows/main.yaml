@@ -18,7 +18,7 @@ env:
   PR_NUMBER: ${{ github.event.pull_request.number }}
   BS_PROJECT_NAME: "flutter_app_playground-Patrol-2.2.5"
   BS_LOCAL_TESTING: "false"
-  # GH_EVENT_OBJECT: ${{ github.event. }}
+  GH_EVENT_OBJECT: $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")"
   
 jobs:
   run_browserstack_tests:
@@ -29,6 +29,7 @@ jobs:
         run: |
           echo "The BS_LOCAL_IDENTIFIER is ${{ env.BS_LOCAL_IDENTIFIER }}"
           echo "The PR_NUMBER is ${{ env.PR_NUMBER }}"
+          echo "Other Number ==> ${{ env.GH_EVENT_OBJECT }}"
 
       # - name: Create comment
       #   uses: peter-evans/create-or-update-comment@v4
