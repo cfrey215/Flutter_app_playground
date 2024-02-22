@@ -18,7 +18,7 @@ env:
   PR_NUMBER: ${{ github.event.pull_request.number }}
   BS_PROJECT_NAME: "flutter_app_playground-Patrol-2.2.5"
   BS_LOCAL_TESTING: "false"
-  GH_EVENT_OBJECT: $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")"
+  GH_EVENT_OBJECT: $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
   
 jobs:
   run_browserstack_tests:
@@ -101,9 +101,11 @@ jobs:
             echo "Build Complete"
             cd /
             echo " "
-            echo "Running Patrol Build"
-            app/workspace/script/browserstack-test-gh.sh build_apps ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          # echo "Running Patrol Build"
           # app/workspace/script/browserstack-test-gh.sh build_apps ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          
+          
+            # app/workspace/script/browserstack-test-gh.sh build_apps ${{ secrets.BROWSERSTACK_USERNAME }} ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
           
       #     # run: |
       #     #   flutter pub get
