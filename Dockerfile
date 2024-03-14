@@ -1,30 +1,36 @@
-# Dockerfile
+FROM cfrey222/exploratory-things:parent as base
 
-FROM ubuntu:20.04
+COPY entrypoint.sh /entrypoint.sh
+COPY /workspace /app
 
-RUN apt update && apt install -y sbcl
+ENV PATH=$PATH:/root/.pub-cache/bin \
+    ANDROID_HOME=/Android \
+    FLUTTER_HOME=/flutter \
+    APP_PATH=/app
 
-# create user
-# RUN groupadd --gid $GID $USER \
-#   && useradd -s /bin/bash --uid $UID --gid $GID -m $USER \
-#   && echo $USER ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USER \
-#   && chmod 0440 /etc/sudoers.d/$USER
+ARG APP_VERSION="1.0.0"
 
-# USER $USER
-# WORKDIR /home/$USER
+# RUN dart pub global activate patrol_cli 2.2.2 \
+# && no "n" | patrol --version
 
-# COPY entrypoint.sh /usr/local/bin/
-# COPY --chown=$USER:$GID workspace workspace
-ENV myDir="script"
-RUN mkdir -p $myDir
+######## Update local.properties ########
+RUN touch $APP_PATH/android/local.properties \
+&& echo "sdk.dir=$ANDROID_HOME/sdk\n" \
+"flutter.sdk=$FLUTTER_HOME\n" \
+"flutter.buildMode=debug\n" \
+"flutter.versionName=$APP_VERSION\n" \
+"flutter.targetSdkVersion=31\n" \
+"flutter.compileSdkVersion=33\n" \
+>> $APP_PATH/android/local.properties
 
-# Copy the script to the container
-COPY ./workspace/script/test.sh $myDir
-RUN chmod +x $myDir/test.sh
+######## Write gradle.properties file ########
+RUN echo "ujetAwsAccessKeyValue= \n" \
+"ujetAwsSecretKeyValue= " >> $APP_PATH/android/gradle.properties
 
-# Set return environment variable
-ENV RETURNED_VALUE="Test Run Id: 14sd45rsvb65ter4b6er75"
+# ######## Install gradle wrapper ########
+RUN $APP_PATH/android/./gradlew -v
 
-# Set the entrypoint to the script with CMD arguments
-# ENTRYPOINT [ "/bin/bash", "-c", "exec ${myDir}/test.sh \"${@}\"", "--"]
-# CMD ["hulk", "batman", "superman"]
+# WORKDIR /app
+
+# Command to execute when the container starts
+# ENTRYPOINT [ "/bin/bash", "-c", "exec /godrive/script/browserstack-test-gh.sh \"${@}\"", "--"]

@@ -31,6 +31,25 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+/workspace/build
+
+# Android related // commenting out some of these so that appcenter will build https://github.com/flutter/flutter/issues/17197
+# **/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/keystore.properties
+**/android/.properties
+**/android/**/godrive_live.jks
+**/android/**/google-play-key.json
+
+# Android Studio will place build artifacts here
+workspace/android/app/debug
+workspace/android/app/profile
+workspace/android/app/release
 
 # Symbolication related
 app.*.symbols
@@ -38,9 +57,12 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-
 .env
+
+# BS Response files
+http.response.code
+curl.output
+error.messages
+
+# Patrol Tests
+test_bundle.dart

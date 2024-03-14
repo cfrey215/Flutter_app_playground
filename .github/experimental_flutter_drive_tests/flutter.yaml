@@ -1,0 +1,323 @@
+on:
+  pull_request:
+    types: 
+      - opened
+      - reopened
+      - synchronize
+      - labeled
+      - unlabeled
+    paths:
+      - '**'
+  push:
+    branches:
+      - '*'
+    
+env:
+  INPUT_NAME: "chrisman"
+  BS_LOCAL_IDENTIFIER: "bs-id-${{ github.event.number }}"
+  PR_NUMBER: ${{ github.event.pull_request.number }}
+  BS_PROJECT_NAME: "flutter_app_playground-Patrol-2.2.5"
+  BS_LOCAL_TESTING: "false"
+  GH_EVENT_OBJECT: $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+  BS_RUNNING_BADGE: https://img.shields.io/badge/BROWSERSTACK%20TEST%20STATUS-RUNNING-47A2FF?style=for-the-badge
+  BS_SUCCESS_BADGE: https://img.shields.io/badge/BROWSERSTACK%20TEST%20STATUS-PASSED-3fb950?style=for-the-badge
+  BS_FAILURE_BADGE: https://img.shields.io/badge/BROWSERSTACK%20TEST%20STATUS-FAILED-FF3333?style=for-the-badge
+  BS_TIMEOUT_BADGE: https://img.shields.io/badge/BROWSERSTACK%20TEST%20STATUS-TIMED%20OUT-FFFF47?style=for-the-badge
+  ACTION_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+  TEST_RUN_TIMEOUT_MINUTES: 30
+  STATUS_CHECK_INTERVAL_SECONDS: 10
+  SLACK_CHANNEL_ID: 'C06F5R3RGRK'
+  FLUTTER_WEB: 'false'
+  PORT: 5378
+  # ANDROID_EMULATOR: GoDriveAndroid30GP_2
+  ANDROID_EMULATOR: test
+  DISPLAY: ':53'
+  UV_THREADPOOL_SIZE: 32
+
+
+jobs:
+  container-test-job:
+    runs-on: ubuntu-20.04
+    container:
+      image: cfrey222/exploratory-things:flutter
+      credentials:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    steps:
+      # - name: Check node version
+      #   run: node -v
+
+      - name: Check ubuntu version
+        run: ldd --version
+
+      - name: check jq version
+        run: jq --version
+
+      - name: Flutter Version
+        run: flutter --version
+
+      - name: Flutter Doctor
+        run: flutter doctor
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2.10.0
+        with:
+          flutter-version: 3.13.6
+          channel: stable
+
+      - name: Flutter Doctor
+        run: flutter doctor
+
+      - name: Update SDK manager
+        run: |
+          sdkmanager --update
+      
+      - name: SDK Installed
+        run: sdkmanager --list_installed
+
+      # Set up emulator
+      - name: Start adb daemon if needed
+        run: adb start-server
+
+      - name: Available Emulators
+        run: flutter emulators
+
+      # - name: Set up emulator if needed
+      #   run: |
+      #     if ! flutter emulators | grep "${{ env.ANDROID_EMULATOR }}"; then
+      #       emulator_package="system-images;android-34;google_apis_playstore;x86_64"
+
+      #       echo "Creating emulator: ${{ env.ANDROID_EMULATOR }}"
+      #       avdmanager create avd \
+      #           --name "${{ env.ANDROID_EMULATOR }}" \
+      #           --package "${emulator_package}" \
+      #           --device "pixel" \
+      #           --force
+      #     fi
+
+      - name: Available Emulators
+        run: flutter emulators
+        # echo "shutdown previos emulators"
+        # adb devices | grep emulator | cut -f1 | while read line; do $adb -s $line emu kill; done
+
+      # # Start background services
+      # - name: Start virtual screen
+      #   run: |
+      #     Xvfb ${{ env.DISPLAY }} -screen 0 600x700x24 &
+      #     echo "Starting Xvfb"
+      #     until xdpyinfo 2> /dev/null > /dev/null; do echo -n "." && sleep 0.5; done
+
+      # - name: Start VNC server
+      #   run: |
+      #     public_ip="66.165.245.122" # $(curl -s https://api.ipify.org?format=json | jq -r '.ip')
+      #     if [ -n "${public_ip}" ]; then
+      #       echo "Open at vnc://${public_ip}:0"
+      #       echo
+      #       echo
+      #     fi
+
+      #     x11vnc -display ${{ env.DISPLAY }} -nopw -forever &
+
+      - name: Start Android Emulator & Backend
+        # env:
+          # GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FCM_SA_KEY }}
+        uses: JarvusInnovations/background-action@v1
+        with:
+          run: |
+            emulator  \
+              -avd "${{ env.ANDROID_EMULATOR }}" \
+              -gpu swiftshader_indirect \
+              -no-boot-anim \
+              -netfast \
+              -nojni \
+              -no-audio \
+              -skin 1440x2560 \
+              -no-snapshot
+
+
+      #  xhost local:$USER && docker run --rm -ti -e UID=$(id -u) -e GID=$(id -g) -p 42000:42000 --workdir /project --device /dev/kvm --device /dev/dri:/dev/dri -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY -v "$PWD":/project --entrypoint flutter-android-emulator  matspfeiffer/flutter
+
+
+# jobs:
+#   container-test-job:
+#     runs-on: ubuntu-20.04 
+#     container:
+#       image: node:16
+#       env:
+#         NODE_ENV: development
+#       ports:
+#         - 80
+#       volumes:
+#         - my_docker_volume:/volume_mount
+#       options: --cpus 1
+#     steps:
+#       - name: Check out the repo
+#         uses: actions/checkout@v2
+      
+#       - name: Check node version
+#         run: node -v
+
+#       - name: Check ubuntu version
+#         run: ldd --version
+
+#       - name: Install jq tool
+#         run: |
+#           apt-get update
+#           apt-get install --yes --no-install-recommends jq sudo
+
+#       - name: check jq version
+#         run: jq --version
+        
+#       - name: Set up Java
+#         uses: actions/setup-java@v3
+#         with:
+#           distribution: 'microsoft'
+#           java-version: '17'
+
+#       - name: Set up Flutter
+#         uses: subosito/flutter-action@v2.10.0
+#         with:
+#           flutter-version: 3.13.6
+#           channel: stable
+
+#       - name: Set Debugging
+#         run: echo "Debugging disabled"
+#         env:
+#           ACTIONS_STEP_DEBUG: false
+
+#       # Uncomment to debug tooled environment via ssh
+#       # - uses: mxschmitt/action-tmate@v3
+
+#       - name: Update SDK manager
+#         run: |
+#           $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --update
+
+#       # Uncomment if an update requires a cleared cache
+#       # - name: Delete cache from flutter/bin
+#       #   run: rm -rf /home/ubuntu/actions-runner/_work/_tool/flutter/stable-3.10.6-x64/bin/cache
+
+#       - name: Flutter doctor
+#         run: flutter doctor
+
+#       # Set up emulator
+#       - name: Start adb daemon if needed
+#         run: ${ANDROID_SDK_ROOT}/platform-tools/adb start-server
+
+
+# jobs:
+#   sample_flutter_driver_setup:
+#     name: Run Browserstack Tests
+#     runs-on: ubuntu-latest
+#     permissions:
+#       write-all
+#     steps:        
+#       - name: Check out the repo
+#         uses: actions/checkout@v2
+
+#       - name: Login to Docker Hub
+#         uses: docker/login-action@v3
+#         with:
+#           username: ${{ secrets.DOCKERHUB_USERNAME }}
+#           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+#       - name: Cache Docker images.
+#         uses: ScribeMD/docker-cache@0.3.7
+#         with:
+#           key: docker-${{ runner.os }}-godrive-flutter-tests
+
+#       - name: Pull Base Image
+#         run: |
+#           docker pull cfrey222/exploratory-things:flutter.drive
+
+#       # - name: Build the Docker image
+#       #   run: |
+#       #     docker build -f Docker_flutter_drive/Dockerfile -t godrive-flutter-tests:latest .
+#       #     docker images
+
+#       - name: Run the build process with Docker
+#         id: docker_run 
+#         uses: addnab/docker-run-action@v3
+#         with:
+#           image: cfrey222/exploratory-things:flutter.drive
+#           options: -v ${{ github.workspace }}:/app
+#           run: |
+#             flutter pub get
+#             cd app/workspace && ls
+#             flutter --version
+#             sdkmanager --list_installed
+#             adb devices
+#             echo "======= PATH ======="
+#             echo $PATH
+
+#       - name: Test
+#         run: |
+#           echo "======= Docker Image Path => $PATH ======="
+#           echo "======= ANDROID_HOME => $ANDROID_HOME ======="
+
+#       - name: Start adb daemon if needed
+#         run: |
+#           echo "======= android dir listing ======="
+#           cd android && ls
+#           echo "======= sdk dir listing ======="
+#           cd sdk && ls
+#           echo "======= platform-tools dir listing ======="
+#           cd platform-tools && ls
+#           adb start-server
+
+#       - name: Set up emulator if needed
+#         run: |
+#           if ! flutter emulators | grep "${ANDROID_EMULATOR}"; then
+#             emulator_package="system-images;android-29;google_apis_playstore;x86"
+
+#             echo "Downloading package: ${emulator_package}"
+#             sudo sdkmanager "${emulator_package}"
+
+#             echo "Creating emulator: ${ANDROID_EMULATOR}"
+#             avdmanager create avd \
+#                 --name "${ANDROID_EMULATOR}" \
+#                 --package "${emulator_package}" \
+#                 --device "pixel" \
+#                 --force
+#           fi
+
+#         # TODO move it to separate step
+#         # echo "sdkmanager - update"
+#         # sudo sdkmanager --update
+
+#         # echo "shutdown previos emulators"
+#         # adb devices | grep emulator | cut -f1 | while read line; do $adb -s $line emu kill; done
+
+#       # Start background services
+#       - name: Start virtual screen
+#         run: |
+#           Xvfb $DISPLAY -screen 0 600x700x24 &
+#           echo "Starting Xvfb"
+#           until xdpyinfo 2> /dev/null > /dev/null; do echo -n "." && sleep 0.5; done
+
+#       - name: Start VNC server
+#         run: |
+#           public_ip="66.165.245.122" # $(curl -s https://api.ipify.org?format=json | jq -r '.ip')
+#           if [ -n "${public_ip}" ]; then
+#             echo "Open at vnc://${public_ip}:0"
+#             echo
+#             echo
+#           fi
+
+#           x11vnc -display $DISPLAY -nopw -forever &
+
+#       - name: Start Android Emulator & Backend
+#         # env:
+#           # GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FCM_SA_KEY }}
+#         uses: JarvusInnovations/background-action@v1
+#         with:
+#           run: |
+#             ${ANDROID_SDK_ROOT}/emulator/emulator  \
+#               -avd "${ANDROID_EMULATOR}" \
+#               -gpu swiftshader_indirect \
+#               -no-boot-anim \
+#               -netfast \
+#               -nojni \
+#               -no-audio \
+#               -skin 1440x2560 \
+#               -no-snapshot

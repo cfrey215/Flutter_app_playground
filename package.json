@@ -3,10 +3,26 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "docker_build": "docker build -t flutter_playground_image .",
+    "run_app": "cd ./workspace && flutter run --debug",
+    "test_app": "cd ./workspace && patrol test --target=integration_test/button_test.dart --debug",
+    "build_android": "flutter build apk --debug --verbose",
+    "build_ios": "",
     "clist": "docker container ls",
     "ilist": "docker image ls",
+    "rImages": "docker image prune",
+    "docker_build_base": "docker build -f Docker_Base/Dockerfile_base_root -t cfrey222/exploratory-things:parent .",
+    "docker_push_base": "docker push cfrey222/exploratory-things:parent",
+    "docker_pull_base": "docker pull cfrey222/exploratory-things:parent",
+    "docker_run_base": "docker run --interactive --tty cfrey222/exploratory-things:parent",
+    "docker_build": "docker build -f Dockerfile -t flutter_playground_image .",
     "docker_run": "docker run --interactive --tty flutter_playground_image chrisfrey somefancykey",
-    "docker_run2": "docker run --interactive --tty flutter_playground_image"
-    }
+    "docker_run2": "docker run --interactive --tty flutter_playground_image",
+    "docker_build_flutter_base": "docker build -f Docker_flutter_drive/Dockerfile -t cfrey222/exploratory-things:flutter .",
+    "docker_run_flutter_base": "docker run --interactive --tty  cfrey222/exploratory-things:flutter",
+    "docker_push_flutter_base": "docker push cfrey222/exploratory-things:flutter",
+    "check_status": "exec workspace/script/browserstack-test-gh.sh check_build_status $BS_USERNAME $BS_ACCESS_KEY 2d2e1197807da725319b5bb3117a5a8009706243",
+    "test_report": "exec workspace/script/browserstack-test-gh.sh generate_test_run_report $BS_USERNAME $BS_ACCESS_KEY 2d2e1197807da725319b5bb3117a5a8009706243 3517656f646b8d76d6ced2000eb1170512bca1c9"
+  
+  },
+  "dependencies": {}
 }
