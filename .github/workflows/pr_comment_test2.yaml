@@ -2,11 +2,11 @@ name: PR Comment Trigger
 
 on:
   # Trigger the workflow on new issues
-  issues:
-    types: [opened]
-  # Trigger the workflow on new pull requests
-  pull_request:
-    types: [opened]
+  # issues:
+  #   types: [opened]
+  # # Trigger the workflow on new pull requests
+  # pull_request:
+  #   types: [opened]
   # Trigger the workflow on new issue comments    
   issue_comment:
     types: [created]
@@ -18,32 +18,32 @@ permissions:
 
 jobs:
   # This job only runs for issues
-  issue:
-    name: Issue opened
-    if: ${{ github.event_name == 'issues' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+  # issue:
+  #   name: Issue opened
+  #   if: ${{ github.event_name == 'issues' }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
       
-  # This job only runs for issue comments
-  issue_comment:
-    name: Issue comment
-    if: ${{ github.event_name == 'issue_comment' && !github.event.issue.pull_request }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: |
-          echo "Issue received => ${{ github.event.comment.body }}"
+  # # This job only runs for issue comments
+  # issue_comment:
+  #   name: Issue comment
+  #   if: ${{ github.event_name == 'issue_comment' && !github.event.issue.pull_request }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - run: |
+  #         echo "Issue received => ${{ github.event.comment.body }}"
 
-  # This job only runs for pull requests  
-  pull_request:
-    name: PR opened
-    if: ${{ github.event_name == 'pull_request' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: |
-          echo "PR Opened... => ${{ github.event.comment.body }}"
+  # # This job only runs for pull requests  
+  # pull_request:
+  #   name: PR opened
+  #   if: ${{ github.event_name == 'pull_request' }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - run: |
+  #         echo "PR Opened... => ${{ github.event.comment.body }}"
 
   # This job only runs for pull request comments  
   pull_request_comment:
