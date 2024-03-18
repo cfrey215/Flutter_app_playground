@@ -1,8 +1,16 @@
 name: PR Comment Trigger
 
 on:
+  # Trigger the workflow on new issues
+  issues:
+    types: [opened]
+  # Trigger the workflow on new pull requests
+  pull_request:
+    types: [opened]
+  # Trigger the workflow on new issue comments    
   issue_comment:
     types: [created]
+
 
 jobs:
   my-job:
@@ -19,5 +27,3 @@ jobs:
         run: |
           # Actions to perform when the specific comment is added
           echo "Comment received => ${{ github.event.comment.body }}"
-
-    
