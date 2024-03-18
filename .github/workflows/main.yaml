@@ -44,30 +44,6 @@ jobs:
           echo "The PR_NUMBER is ${{ env.PR_NUMBER }}"
           echo "Other Number ==> ${{ env.GH_EVENT_OBJECT }}"
 
-      # - name: Get branch names.
-      #   id: branch-names
-      #   uses: tj-actions/branch-names@v8
-
-      # # - name: Running on the default branch.
-      # #   if: steps.branch-names.outputs.is_default == 'true'
-      # #   run: |
-      # #     echo "Running on default: ${{ steps.branch-names.outputs.current_branch }}"
-      # #   # Outputs: "Running on default: main"
-
-      # - name: Running on a pull request branch.
-      #   id: get_pr_data
-      #   if: steps.branch-names.outputs.is_default == 'false'
-      #   run: |
-      #     echo "Running on pr: ${{ steps.branch-names.outputs.current_branch }}"
-      #     echo "BRANCH_NAME=${{ steps.branch-names.outputs.current_branch }}" >> "$GITHUB_OUTPUT"
-      #   # Outputs: "Running on pr: feature/test"
-
-      # # - name: Running on a pull request branch.
-      # #   if: steps.branch-names.outputs.is_default == 'false'
-      # #   run: |
-      # #     echo "Base branch: ${{ steps.branch-names.outputs.base_ref_branch }}"
-      # #   # Outputs: "Base branch: main"
-
       - uses: actions/github-script@v7
         id: get_pr_data
         with:
@@ -207,20 +183,6 @@ jobs:
             echo "pr-comment-body=View the CI Action [here][url]." >> $GITHUB_OUTPUT
             echo "testRunStatusDisplay=A PIPELINE ERROR HAS OCCURRED" >> $GITHUB_OUTPUT
           fi
-        # echo "test-summary=$(cat test-summary.md)" >> $GITHUB_OUTPUT
-        # if [ "${{ steps.browserstack_build_status.outputs.BROWSERSTACK_BUILD_STATUS }}" == "passed" ]; then
-        #   echo "test-badge=${{ env.BS_SUCCESS_BADGE }}" >> $GITHUB_OUTPUT
-        #   echo "status-emoji=hooray" >> $GITHUB_OUTPUT
-        #   echo "slack-message=<${{ steps.pr_data.outputs.PR_URL }}|${{ steps.pr_data.outputs.BRANCH_NAME }}>\n:checked: Browserstack Test Run has ${{ steps.browserstack_build_status.outputs.BROWSERSTACK_BUILD_STATUS }}!\n\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_CASES || 0 }} Total Tests\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_PASSED || 0}} tests passed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_FAILED || 0}} tests failed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_SKIPPED || 0}} tests skipped" >> $GITHUB_OUTPUT
-        # elif [ "${{ steps.browserstack_build_status.outputs.BROWSERSTACK_BUILD_STATUS }}" == "timeout" ]; then
-        #   echo "test-badge=${{ env.BS_TIMEOUT_BADGE }}" >> $GITHUB_OUTPUT
-        #   echo "status-emoji=-1" >> $GITHUB_OUTPUT
-        #   echo "slack-message=<${{ steps.pr_data.outputs.PR_URL }}|${{ steps.pr_data.outputs.BRANCH_NAME }}>\n:x: Browserstack Test Run has ${{ steps.browserstack_build_status.outputs.BROWSERSTACK_BUILD_STATUS }}!\n\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_CASES || 0 }} Total Tests\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_PASSED || 0}} tests passed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_FAILED || 0}} tests failed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_SKIPPED || 0}} tests skipped" >> $GITHUB_OUTPUT
-        # else
-        #   echo "test-badge=${{ env.BS_FAILURE_BADGE }}" >> $GITHUB_OUTPUT
-        #   echo "status-emoji=-1" >> $GITHUB_OUTPUT
-        #   echo "slack-message=<${{ steps.pr_data.outputs.PR_URL }}|${{ steps.pr_data.outputs.BRANCH_NAME }}>\n:x: Browserstack Test Run has ${{ steps.browserstack_build_status.outputs.BROWSERSTACK_BUILD_STATUS }}!\n\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_CASES || 0 }} Total Tests\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_PASSED || 0}} tests passed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_FAILED || 0}} tests failed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_SKIPPED || 0}} tests skipped" >> $GITHUB_OUTPUT
-        # fi
 
       - name: Update comment
         uses: peter-evans/create-or-update-comment@v4
