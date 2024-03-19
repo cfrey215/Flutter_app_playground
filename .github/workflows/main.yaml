@@ -8,9 +8,11 @@ on:
   #     - unlabeled
   #   paths:
   #     - '**'
-  push:
-    branches:
-      - '*'
+  # push:
+  #   branches:
+  #     - '*'
+  issue_comment:
+    types: [created]
     
 env:
   INPUT_NAME: "chrisman"
@@ -33,6 +35,7 @@ env:
 
 jobs:
   run_browserstack_tests:
+    if: ${{ github.event_name == 'issue_comment' && contains(github.event.comment.body, '/e2e')}}
     name: Run Browserstack Tests
     runs-on: ubuntu-latest
     permissions:
@@ -43,6 +46,9 @@ jobs:
           echo "The BS_LOCAL_IDENTIFIER is ${{ env.BS_LOCAL_IDENTIFIER }}"
           echo "The PR_NUMBER is ${{ env.PR_NUMBER }}"
           echo "Other Number ==> ${{ env.GH_EVENT_OBJECT }}"
+          echo 'Comment ID => ${{ github.event.comment.id }}'
+          echo "Issue received ==> ${{ github.event.comment.body }}"
+          echo "COMMENT_ID=${{ github.event.comment.id }}" >> "$GITHUB_OUTPUT"
 
       - uses: actions/github-script@v7
         id: get_pr_data
@@ -69,7 +75,7 @@ jobs:
         id: create_comment
         uses: peter-evans/create-or-update-comment@v4
         with:
-          issue-number: ${{ fromJson(steps.get_pr_data.outputs.result).number }}
+          issue-number: ${{ env.COMMENT_ID }}
           body: |
             Building the app and preparing to run BrowserStack test suite, check back here for results...
           reactions: 'rocket'
