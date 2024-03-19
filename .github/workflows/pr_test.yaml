@@ -79,11 +79,11 @@ jobs:
         run: |
           echo 'Comment ID => ${{ github.event.comment.id }}'
 
-      - name: Pull Request data
-        id: pr_data
-        run: |
-          echo 'issue-number => ${{ fromJson(steps.get_pr_data1.outputs.result).number }}'
-          echo 'BRANCH_NAME => ${{ fromJson(steps.get_pr_data1.outputs.result).title }}'
-          echo '${{ fromJson(steps.get_pr_data1.outputs.result).pull_request.head.url }}'
-          echo "BRANCH_NAME=${{ fromJson(steps.get_pr_dat1a.outputs.result).title }}" >> "$GITHUB_OUTPUT"
-          echo "PR_URL=https://github.com/cfrey215/Flutter_app_playground/pull/${{ fromJson(steps.get_pr_data1.outputs.result).number }}" >> "$GITHUB_OUTPUT"
+      # - name: Pull Request data
+      #   id: pr_data
+      #   run: |
+      #     echo 'issue-number => ${{ fromJson(steps.get_pr_data1.outputs.result).number }}'
+      #     echo 'BRANCH_NAME => ${{ fromJson(steps.get_pr_data1.outputs.result).title }}'
+      #     echo '${{ fromJson(steps.get_pr_data1.outputs.result).pull_request.head.url }}'
+      #     echo "BRANCH_NAME=${{ fromJson(steps.get_pr_dat1a.outputs.result).title }}" >> "$GITHUB_OUTPUT"
+      #     echo "PR_URL=https://github.com/cfrey215/Flutter_app_playground/pull/${{ fromJson(steps.get_pr_data1.outputs.result).number }}" >> "$GITHUB_OUTPUT"
