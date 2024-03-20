@@ -73,7 +73,7 @@ jobs:
           REPO: ${{ github.repository }}
           PR_NO: ${{ github.event.issue.number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Outputs
         id: pr_data
         run: |  
@@ -85,27 +85,6 @@ jobs:
           echo "Issue received ==> ${{ github.event.comment.body }}"
           echo "PR_URL ==> https://github.com/gopuff/gopuff_godrive_v2/pull/${{ steps.issue_number.outputs.PR_NUMBER }}"
           echo "BRANCH NAME => ${{ steps.get-branch.outputs.BRANCH_NAME }}"
-
-      # - uses: actions/github-script@v7
-      #   id: get_pr_data
-      #   with:
-      #     script: |
-      #         return (
-      #           await github.rest.repos.listPullRequestsAssociatedWithCommit({
-      #             commit_sha: context.sha,
-      #             owner: context.repo.owner,
-      #             repo: context.repo.repo,
-      #           })
-      #         ).data[0];
-
-      # - name: Pull Request data
-      #   id: pr_data
-      #   run: |
-      #     echo '${{ fromJson(steps.get_pr_data.outputs.result).number }}'
-      #     echo '${{ fromJson(steps.get_pr_data.outputs.result).title }}'
-      #     echo '${{ fromJson(steps.get_pr_data.outputs.result).pull_request.head.url }}'
-      #     echo "BRANCH_NAME=${{ fromJson(steps.get_pr_data.outputs.result).title }}" >> "$GITHUB_OUTPUT"
-      #     echo "PR_URL=https://github.com/cfrey215/Flutter_app_playground/pull/${{ fromJson(steps.get_pr_data.outputs.result).number }}" >> "$GITHUB_OUTPUT"
 
       - name: Create comment
         id: create_comment
