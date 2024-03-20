@@ -15,6 +15,7 @@ on:
 permissions:
   issues: write
   pull-requests: write
+  contents: read
 
 jobs:
   # # This job only runs for issues
@@ -59,53 +60,58 @@ jobs:
               ).data[0].number;
             }
           result-encoding: string
+
       - name: Issue number
         run: |
           echo '${{steps.get_issue_number.outputs.result}}'
-          echo "PR_NUM=${{steps.get_issue_number.outputs.result}}" >> "$GITHUB_OUTPUT"
-        
+          echo "PR_NUMBER=${{steps.get_issue_number.outputs.result}}" >> "$GITHUB_OUTPUT"
+          
       - name: Get branch names.
         id: branch-names
         uses: tj-actions/branch-names@v8
-
-      - uses: actions/checkout@v3
-      - run: |
-          echo 'Comment ID => ${{ github.event.comment.id }}'
-          echo "Issue received ==> ${{ github.event.comment.body }}"
-          echo "Running on default: ${{ steps.branch-names.outputs.current_branch }}" 
-          echo "Running on pr: ${{ steps.branch-names.outputs.current_branch }}"
-          echo "Base branch: ${{ steps.branch-names.outputs.base_ref_branch }}"
-          echo "Default branch: ${{ steps.branch-names.outputs.default_branch }}"
-          echo "outputs: ${{ steps.branch-names.outputs }}"
 
       - name: Running on the default branch.
         if: steps.branch-names.outputs.is_default == 'true'
         run: |
           echo "Running on default: ${{ steps.branch-names.outputs.current_branch }}" 
+          echo "BRANCH_NAME=${{ steps.branch-names.outputs.current_branch }}" >> "$GITHUB_OUTPUT"
         # Outputs: "Running on default: main"
       
       - name: Running on a pull request branch.
         if: steps.branch-names.outputs.is_default == 'false'
         run: |
           echo "Running on pr: ${{ steps.branch-names.outputs.current_branch }}"
+          echo "BRANCH_NAME=${{ steps.branch-names.outputs.current_branch }}" >> "$GITHUB_OUTPUT"
         # Outputs: "Running on pr: feature/test"
       
       - name: Running on a pull request branch.
         if: steps.branch-names.outputs.is_default == 'false'
         run: |
           echo "Base branch: ${{ steps.branch-names.outputs.base_ref_branch }}"
+          echo "BRANCH_NAME=${{ steps.branch-names.outputs.base_ref_branch }}" >> "$GITHUB_OUTPUT"
         # Outputs: "Base branch: main"
         
       - name: Running on any event.
         run: |
           echo "Default branch: ${{ steps.branch-names.outputs.default_branch }}
+          echo "BRANCH_NAME=${{ steps.branch-names.outputs.default_branch }}" >> "$GITHUB_OUTPUT"
 
-  # This job only runs for pull requests  
-  # pull_request:
-  #   name: PR opened
-  #   if: ${{ github.event_name == 'pull_request' }}
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - run: |
-  #         echo "PR Opened... => ${{ github.event.comment.body }}"
+      - name: Outputs
+        run: |  
+          echo "The PR_NUMBER is ${{ env.PR_NUMBER }}"
+          echo "BRANCH_NAME ==> ${{ env.BRANCH_NAME }}"
+          echo "PR_URL=https://github.com/gopuff/gopuff_godrive_v2/pull/${{ env.PR_NUMBER }}
+          echo "COMMENT_ID=${{ github.event.comment.id }}" >> "$GITHUB_OUTPUT"
+          echo "GH_EVENT_OBJECT Number ==> ${{ env.GH_EVENT_OBJECT }}"
+          echo 'Comment ID => ${{ github.event.comment.id }}'
+          echo "Issue received ==> ${{ github.event.comment.body }}"
+          echo "PR_URL ==> ${{ env.PR_URL }}"
+
+      - name: Update comment:running
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ env.COMMENT_ID }}
+          body: |
+            ...Building the app and preparing to run BrowserStack test suite, check back here for results...
+          edit-mode: append
+          reactions: 'rocket'
