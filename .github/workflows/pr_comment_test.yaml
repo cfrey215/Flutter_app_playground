@@ -41,10 +41,19 @@ jobs:
     if: ${{ github.event_name == 'issue_comment' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Get branch names.
+        id: branch-names
+        uses: tj-actions/branch-names@v8
+
       - uses: actions/checkout@v3
       - run: |
           echo 'Comment ID => ${{ github.event.comment.id }}'
           echo "Issue received ==> ${{ github.event.comment.body }}"
+          echo "Running on default: ${{ steps.branch-names.outputs.current_branch }}" 
+          echo "Running on pr: ${{ steps.branch-names.outputs.current_branch }}"
+          echo "Base branch: ${{ steps.branch-names.outputs.base_ref_branch }}"
+          echo "Default branch: ${{ steps.branch-names.outputs.default_branch }}"
+          echo "outputs: ${{ steps.branch-names.outputs }}"
 
       - name: Running on the default branch.
         if: steps.branch-names.outputs.is_default == 'true'
