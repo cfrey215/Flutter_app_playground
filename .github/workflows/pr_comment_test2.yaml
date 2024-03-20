@@ -1,0 +1,105 @@
+name: PR Comment Trigger 2
+
+on:
+  # # Trigger the workflow on new issues
+  # issues:
+  #   types: [opened]
+  # # Trigger the workflow on new pull requests
+  # pull_request:
+  #   types: [opened]
+  # Trigger the workflow on new issue comments    
+  issue_comment:
+    types: [created]
+
+# Allows the workflow to create comments on issues and pull requests
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  # # This job only runs for issues
+  # issue:
+  #   name: Issue opened
+  #   if: ${{ github.event_name == 'issues' }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+      
+  # This job only runs for issue comments
+  # issue_comment_not_pr:
+  #   name: Issue comment
+  #   if: ${{ github.event_name == 'issue_comment' && !github.event.issue.pull_request }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - run: |
+  #         echo 'Comment ID => ${{ github.event.comment.id }}'
+  #         echo "Issue received ==> ${{ github.event.comment.body }}"
+
+  issue_comment:
+    name: Issue comment PR
+    if: ${{ github.event_name == 'issue_comment' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get branch names.
+        id: branch-names
+        uses: tj-actions/branch-names@v8
+
+      - uses: actions/checkout@v3
+      - run: |
+          echo 'Comment ID => ${{ github.event.comment.id }}'
+          echo "Issue received ==> ${{ github.event.comment.body }}"
+          echo "Running on default: ${{ steps.branch-names.outputs.current_branch }}" 
+          echo "Running on pr: ${{ steps.branch-names.outputs.current_branch }}"
+          echo "Base branch: ${{ steps.branch-names.outputs.base_ref_branch }}"
+          echo "Default branch: ${{ steps.branch-names.outputs.default_branch }}"
+          echo "outputs: ${{ steps.branch-names.outputs }}"
+
+      - name: Running on the default branch.
+        if: steps.branch-names.outputs.is_default == 'true'
+        run: |
+          echo "Running on default: ${{ steps.branch-names.outputs.current_branch }}" 
+        # Outputs: "Running on default: main"
+      
+      - name: Running on a pull request branch.
+        if: steps.branch-names.outputs.is_default == 'false'
+        run: |
+          echo "Running on pr: ${{ steps.branch-names.outputs.current_branch }}"
+        # Outputs: "Running on pr: feature/test"
+      
+      - name: Running on a pull request branch.
+        if: steps.branch-names.outputs.is_default == 'false'
+        run: |
+          echo "Base branch: ${{ steps.branch-names.outputs.base_ref_branch }}"
+        # Outputs: "Base branch: main"
+        
+      - name: Running on any event.
+        run: |
+          echo "Default branch: ${{ steps.branch-names.outputs.default_branch }}"
+
+      - uses: actions/github-script@v6
+        id: get_pr_data
+        with:
+          script: |
+              return (
+                await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                  commit_sha: context.sha,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                })
+              ).data[0];
+      - name: Pull Request data
+        run: |
+          echo '${{ fromJson(steps.get_pr_data.outputs.result).number }}'
+          echo '${{ fromJson(steps.get_pr_data.outputs.result).title }}'
+          
+  # This job only runs for pull requests  
+  # pull_request:
+  #   name: PR opened
+  #   if: ${{ github.event_name == 'pull_request' }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - run: |
+  #         echo "PR Opened... => ${{ github.event.comment.body }}"
