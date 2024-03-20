@@ -27,6 +27,7 @@ env:
   BS_TIMEOUT_BADGE: https://img.shields.io/badge/BROWSERSTACK%20TEST%20STATUS-TIMED%20OUT-FFFF47?style=for-the-badge
   BS_NOTRUN_BADGE: https://img.shields.io/badge/BROWSERSTACK%20TEST%20STATUS-NOT%20RUN-FF47FF?style=for-the-badge
   ACTION_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+  PR_URL: https://github.com/gopuff/gopuff_godrive_v2/pull/${{ github.event.pull_request.number }}
   TEST_RUN_STATE: 'not-started'
   TEST_DEVICE_ARRAY: '["Google Pixel 8-14.0"]'
   TEST_RUN_TIMEOUT_MINUTES: 30
@@ -41,6 +42,16 @@ jobs:
     permissions:
       write-all
     steps:
+      - name: Get branch names.
+        id: branch-names
+        uses: tj-actions/branch-names@v8
+
+      - name: Running on a pull request branch.
+        id: get_pr_data
+        if: steps.branch-names.outputs.is_default == 'false'
+        run: |
+          echo "BRANCH_NAME=${{ steps.branch-names.outputs.current_branch }}" >> "$GITHUB_OUTPUT"
+  
       - name: Outputs
         run: |
           echo "The BS_LOCAL_IDENTIFIER is ${{ env.BS_LOCAL_IDENTIFIER }}"
@@ -48,28 +59,30 @@ jobs:
           echo "Other Number ==> ${{ env.GH_EVENT_OBJECT }}"
           echo 'Comment ID => ${{ github.event.comment.id }}'
           echo "Issue received ==> ${{ github.event.comment.body }}"
+          echo "PR_URL ==> ${{ env.PR_URL }}"
+          echo "BRANCH_NAME ==> ${{ env.BRANCH_NAME }}"
           echo "COMMENT_ID=${{ github.event.comment.id }}" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/github-script@v7
-        id: get_pr_data
-        with:
-          script: |
-              return (
-                await github.rest.repos.listPullRequestsAssociatedWithCommit({
-                  commit_sha: context.sha,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                })
-              ).data[0];
+      # - uses: actions/github-script@v7
+      #   id: get_pr_data
+      #   with:
+      #     script: |
+      #         return (
+      #           await github.rest.repos.listPullRequestsAssociatedWithCommit({
+      #             commit_sha: context.sha,
+      #             owner: context.repo.owner,
+      #             repo: context.repo.repo,
+      #           })
+      #         ).data[0];
 
-      - name: Pull Request data
-        id: pr_data
-        run: |
-          echo '${{ fromJson(steps.get_pr_data.outputs.result).number }}'
-          echo '${{ fromJson(steps.get_pr_data.outputs.result).title }}'
-          echo '${{ fromJson(steps.get_pr_data.outputs.result).pull_request.head.url }}'
-          echo "BRANCH_NAME=${{ fromJson(steps.get_pr_data.outputs.result).title }}" >> "$GITHUB_OUTPUT"
-          echo "PR_URL=https://github.com/cfrey215/Flutter_app_playground/pull/${{ fromJson(steps.get_pr_data.outputs.result).number }}" >> "$GITHUB_OUTPUT"
+      # - name: Pull Request data
+      #   id: pr_data
+      #   run: |
+      #     echo '${{ fromJson(steps.get_pr_data.outputs.result).number }}'
+      #     echo '${{ fromJson(steps.get_pr_data.outputs.result).title }}'
+      #     echo '${{ fromJson(steps.get_pr_data.outputs.result).pull_request.head.url }}'
+      #     echo "BRANCH_NAME=${{ fromJson(steps.get_pr_data.outputs.result).title }}" >> "$GITHUB_OUTPUT"
+      #     echo "PR_URL=https://github.com/cfrey215/Flutter_app_playground/pull/${{ fromJson(steps.get_pr_data.outputs.result).number }}" >> "$GITHUB_OUTPUT"
 
       - name: Create comment
         id: create_comment
