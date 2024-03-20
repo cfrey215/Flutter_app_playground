@@ -17,7 +17,6 @@ on:
 env:
   INPUT_NAME: "chrisman"
   BS_LOCAL_IDENTIFIER: "bs-id-${{ github.event.number }}"
-  PR_NUMBER: ${{ context.issue.number }}
   BS_PROJECT_NAME: "flutter_app_playground-Patrol-2.2.5"
   BS_LOCAL_TESTING: "false"
   GH_EVENT_OBJECT: $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
@@ -61,9 +60,10 @@ jobs:
           result-encoding: string
   
       - name: Issue number
+        id: issue_number
         run: |
-          echo '${{steps.get_issue_number.outputs.result}}'
-          echo "PR_NUM=${{steps.get_issue_number.outputs.result}}" >> "$GITHUB_OUTPUT"
+          echo 'ISSUE_NUMBER => ${{steps.get_issue_number.outputs.result}}'
+          echo "PR_NUMBER=${{steps.get_issue_number.outputs.result}}" >> "$GITHUB_OUTPUT"
           
       - name: Get branch names.
         id: branch-names
@@ -76,16 +76,15 @@ jobs:
           echo "BRANCH_NAME=${{ steps.branch-names.outputs.current_branch }}" >> "$GITHUB_OUTPUT"
   
       - name: Outputs
-        run: |
-          echo "The BS_LOCAL_IDENTIFIER is ${{ env.BS_LOCAL_IDENTIFIER }}"
-          echo "The PR_NUMBER is ${{ env.PR_NUMBER }}"
-          echo "Other Number ==> ${{ env.GH_EVENT_OBJECT }}"
+        id: pr_data
+        run: |  
+          echo "The PR_NUMBER is ${{ steps.issue_number.outputs.PR_NUMBER }}"
+          echo "PR_URL=https://github.com/gopuff/gopuff_godrive_v2/pull/${{ steps.issue_number.outputs.PR_NUMBER }}"
+          echo "COMMENT_ID=${{ github.event.comment.id }}" >> "$GITHUB_OUTPUT"
+          echo "GH_EVENT_OBJECT Number ==> ${{ env.GH_EVENT_OBJECT }}"
           echo 'Comment ID => ${{ github.event.comment.id }}'
           echo "Issue received ==> ${{ github.event.comment.body }}"
-          echo "PR_URL ==> ${{ env.PR_URL }}"
-          echo "BRANCH_NAME ==> ${{ env.BRANCH_NAME }}"
-          echo "PR_URL=https://github.com/gopuff/gopuff_godrive_v2/pull/${{ env.PR_NUMBER }}
-          echo "COMMENT_ID=${{ github.event.comment.id }}" >> "$GITHUB_OUTPUT"
+          echo "PR_URL ==> https://github.com/gopuff/gopuff_godrive_v2/pull/${{ steps.issue_number.outputs.PR_NUMBER }}"
 
       # - uses: actions/github-script@v7
       #   id: get_pr_data
@@ -112,9 +111,10 @@ jobs:
         id: create_comment
         uses: peter-evans/create-or-update-comment@v4
         with:
-          comment-id: ${{ env.COMMENT_ID }}
+          comment-id: ${{ github.event.comment.id }}
           body: |
             Building the app and preparing to run BrowserStack test suite, check back here for results...
+          edit-mode: append
           reactions: 'rocket'
   
       - name: Check out the repo
