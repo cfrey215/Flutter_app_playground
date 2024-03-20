@@ -74,7 +74,7 @@ jobs:
         if: steps.branch-names.outputs.is_default == 'false'
         run: |
           echo "BRANCH_NAME=${{ steps.branch-names.outputs.current_branch }}" >> "$GITHUB_OUTPUT"
-  
+
       - name: Outputs
         id: pr_data
         run: |  
