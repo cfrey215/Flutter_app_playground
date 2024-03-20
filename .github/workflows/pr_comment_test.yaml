@@ -78,21 +78,25 @@ jobs:
           echo "Default branch: ${{ steps.branch-names.outputs.default_branch }}"
           
       - uses: actions/github-script@v6
-        id: get_pr_data
+        id: get_issue_number
         with:
           script: |
+            if (context.issue.number) {
+              // Return issue number if present
+              return context.issue.number;
+            } else {
+              // Otherwise return issue number from commit
               return (
                 await github.rest.repos.listPullRequestsAssociatedWithCommit({
                   commit_sha: context.sha,
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                 })
-              ).data[0];
-  
-      - name: Pull Request data
-        run: |
-          echo '${{ fromJson(steps.get_pr_data.outputs.result).number }}'
-          echo '${{ fromJson(steps.get_pr_data.outputs.result).title }}'
+              ).data[0].number;
+            }
+          result-encoding: string
+      - name: Issue number
+        run: echo '${{steps.get_issue_number.outputs.result}}'
 
   # This job only runs for pull requests  
   # pull_request:
