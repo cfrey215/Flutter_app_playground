@@ -70,7 +70,15 @@ jobs:
         run: |
           echo 'ISSUE_NUMBER => ${{steps.get_issue_number.outputs.result}}'
           echo "PR_NUMBER=${{steps.get_issue_number.outputs.result}}" >> "$GITHUB_OUTPUT"
-          
+      - id: 'get-branch'
+        run: |
+          echo "branch::$(gh pr view $PR_NO --repo $REPO --json headRefName --jq '.headRefName')"
+          echo "BRANCH_NAME=$(gh pr view $PR_NO --repo $REPO --json headRefName --jq '.headRefName')" >> "$GITHUB_OUTPUT"
+        env:
+          REPO: ${{ github.repository }}
+          PR_NO: ${{ github.event.issue.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
       - name: Get branch names.
         id: branch-names
         uses: tj-actions/branch-names@v8
@@ -79,27 +87,27 @@ jobs:
         if: steps.branch-names.outputs.is_default == 'true'
         run: |
           echo "Running on default: ${{ steps.branch-names.outputs.current_branch }}" 
-          echo "BRANCH_NAME=${{ steps.branch-names.outputs.current_branch }}" >> "$GITHUB_OUTPUT"
+        # echo "BRANCH_NAME=${{ steps.branch-names.outputs.current_branch }}" >> "$GITHUB_OUTPUT"
         # Outputs: "Running on default: main"
       
       - name: Running on a pull request branch.
         if: steps.branch-names.outputs.is_default == 'false'
         run: |
           echo "Running on pr: ${{ steps.branch-names.outputs.current_branch }}"
-          echo "BRANCH_NAME=${{ steps.branch-names.outputs.current_branch }}" >> "$GITHUB_OUTPUT"
+        # echo "BRANCH_NAME=${{ steps.branch-names.outputs.current_branch }}" >> "$GITHUB_OUTPUT"
         # Outputs: "Running on pr: feature/test"
       
       - name: Running on a pull request branch.
         if: steps.branch-names.outputs.is_default == 'false'
         run: |
           echo "Base branch: ${{ steps.branch-names.outputs.base_ref_branch }}"
-          echo "BRANCH_NAME=${{ steps.branch-names.outputs.base_ref_branch }}" >> "$GITHUB_OUTPUT"
+        # echo "BRANCH_NAME=${{ steps.branch-names.outputs.base_ref_branch }}" >> "$GITHUB_OUTPUT"
         # Outputs: "Base branch: main"
         
       - name: Running on any event.
         run: |
           echo "Default branch: ${{ steps.branch-names.outputs.default_branch }}"
-          echo "BRANCH_NAME=${{ steps.branch-names.outputs.default_branch }}" >> "$GITHUB_OUTPUT"
+        # echo "BRANCH_NAME=${{ steps.branch-names.outputs.default_branch }}" >> "$GITHUB_OUTPUT"
 
       - name: Outputs
         run: |  
@@ -109,6 +117,7 @@ jobs:
           echo 'Comment ID => ${{ github.event.comment.id }}'
           echo "Issue received ==> ${{ github.event.comment.body }}"
           echo "PR_URL ==> https://github.com/gopuff/gopuff_godrive_v2/pull/${{ steps.issue_number.outputs.PR_NUMBER }}"
+          echo "BRANCH NAME => ${{ steps.get-branch.outputs.BRANCH_NAME }}"
 
       - name: Update comment:running
         uses: peter-evans/create-or-update-comment@v4
