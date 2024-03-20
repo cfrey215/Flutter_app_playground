@@ -93,7 +93,7 @@ jobs:
         
       - name: Running on any event.
         run: |
-          echo "Default branch: ${{ steps.branch-names.outputs.default_branch }}
+          echo "Default branch: ${{ steps.branch-names.outputs.default_branch }}"
           echo "BRANCH_NAME=${{ steps.branch-names.outputs.default_branch }}" >> "$GITHUB_OUTPUT"
 
       - name: Outputs
