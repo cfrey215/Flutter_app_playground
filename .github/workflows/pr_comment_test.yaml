@@ -46,6 +46,28 @@ jobs:
           echo 'Comment ID => ${{ github.event.comment.id }}'
           echo "Issue received ==> ${{ github.event.comment.body }}"
 
+      - name: Running on the default branch.
+        if: steps.branch-names.outputs.is_default == 'true'
+        run: |
+          echo "Running on default: ${{ steps.branch-names.outputs.current_branch }}" 
+        # Outputs: "Running on default: main"
+      
+      - name: Running on a pull request branch.
+        if: steps.branch-names.outputs.is_default == 'false'
+        run: |
+          echo "Running on pr: ${{ steps.branch-names.outputs.current_branch }}"
+        # Outputs: "Running on pr: feature/test"
+      
+      - name: Running on a pull request branch.
+        if: steps.branch-names.outputs.is_default == 'false'
+        run: |
+          echo "Base branch: ${{ steps.branch-names.outputs.base_ref_branch }}"
+        # Outputs: "Base branch: main"
+        
+      - name: Running on any event.
+        run: |
+          echo "Default branch: ${{ steps.branch-names.outputs.default_branch }}"
+
   # This job only runs for pull requests  
   # pull_request:
   #   name: PR opened
