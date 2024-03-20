@@ -62,62 +62,29 @@ jobs:
       - name: Issue number
         id: issue_number
         run: |
-<<<<<<< HEAD
           echo 'ISSUE_NUMBER => ${{steps.get_issue_number.outputs.result}}'
-=======
-          echo '${{steps.get_issue_number.outputs.result}}'
->>>>>>> d02af36 (main gha comment test)
           echo "PR_NUMBER=${{steps.get_issue_number.outputs.result}}" >> "$GITHUB_OUTPUT"
-          
-      - name: Get branch names.
-        id: branch-names
-        uses: tj-actions/branch-names@v8
 
-      - name: Running on the default branch.
-        if: steps.branch-names.outputs.is_default == 'true'
+      - id: 'get-branch'
         run: |
-          echo "Running on default: ${{ steps.branch-names.outputs.current_branch }}" 
-        # Outputs: "Running on default: main"
-      
-      - name: Running on a pull request branch.
-        if: steps.branch-names.outputs.is_default == 'false'
-        run: |
-          echo "Running on pr: ${{ steps.branch-names.outputs.current_branch }}"
-        # Outputs: "Running on pr: feature/test"
-      
-      - name: Running on a pull request branch.
-        if: steps.branch-names.outputs.is_default == 'false'
-        run: |
-          echo "Base branch: ${{ steps.branch-names.outputs.base_ref_branch }}"
-        # Outputs: "Base branch: main"
-        
-      - name: Running on any event.
-        run: |
-          echo "Default branch: ${{ steps.branch-names.outputs.default_branch }}
+          echo "branch::$(gh pr view $PR_NO --repo $REPO --json headRefName --jq '.headRefName')"
+          echo "BRANCH_NAME=$(gh pr view $PR_NO --repo $REPO --json headRefName --jq '.headRefName')" >> "$GITHUB_OUTPUT"
+        env:
+          REPO: ${{ github.repository }}
+          PR_NO: ${{ github.event.issue.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Outputs
-<<<<<<< HEAD
         id: pr_data
         run: |  
           echo "The PR_NUMBER is ${{ steps.issue_number.outputs.PR_NUMBER }}"
-          echo "PR_URL=https://github.com/gopuff/gopuff_godrive_v2/pull/${{ steps.issue_number.outputs.PR_NUMBER }}"
+          echo "PR_URL=https://github.com/gopuff/gopuff_godrive_v2/pull/${{ steps.issue_number.outputs.PR_NUMBER }}" >> "$GITHUB_OUTPUT"
           echo "COMMENT_ID=${{ github.event.comment.id }}" >> "$GITHUB_OUTPUT"
           echo "GH_EVENT_OBJECT Number ==> ${{ env.GH_EVENT_OBJECT }}"
           echo 'Comment ID => ${{ github.event.comment.id }}'
           echo "Issue received ==> ${{ github.event.comment.body }}"
           echo "PR_URL ==> https://github.com/gopuff/gopuff_godrive_v2/pull/${{ steps.issue_number.outputs.PR_NUMBER }}"
-=======
-        run: |  
-          echo "BRANCH_NAME ==> ${{ env.BRANCH_NAME }}"
-          echo "PR_URL=https://github.com/gopuff/gopuff_godrive_v2/pull/${{ env.PR_NUMBER }}
-          echo "COMMENT_ID=${{ github.event.comment.id }}" >> "$GITHUB_OUTPUT"
->>>>>>> d02af36 (main gha comment test)
-
-          echo "The PR_NUMBER is ${{ env.PR_NUMBER }}"
-          echo "GH_EVENT_OBJECT Number ==> ${{ env.GH_EVENT_OBJECT }}"
-          echo 'Comment ID => ${{ github.event.comment.id }}'
-          echo "Issue received ==> ${{ github.event.comment.body }}"
-          echo "PR_URL ==> ${{ env.PR_URL }}"
+          echo "BRANCH NAME => ${{ steps.get-branch.outputs.BRANCH_NAME }}"
 
       - name: Create comment
         id: create_comment
@@ -216,17 +183,17 @@ jobs:
             if [ "${{ steps.browserstack_build_status.outputs.BROWSERSTACK_BUILD_STATUS }}" == "passed" ]; then
               echo "test-badge=${{ env.BS_SUCCESS_BADGE }}" >> $GITHUB_OUTPUT
               echo "status-emoji=hooray" >> $GITHUB_OUTPUT
-              echo "slack-message=<${{ steps.pr_data.outputs.PR_URL }}|${{ steps.pr_data.outputs.BRANCH_NAME }}>\n:checked: Browserstack Test Run has PASSED!\n\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_CASES || 0 }} Total Tests\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_PASSED || 0}} tests passed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_FAILED || 0}} tests failed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_SKIPPED || 0}} tests skipped" >> $GITHUB_OUTPUT
+              echo "slack-message=<${{ steps.pr_data.outputs.PR_URL }}|${{ steps.get-branch.outputs.BRANCH_NAME }}>\n:checked: Browserstack Test Run has PASSED!\n\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_CASES || 0 }} Total Tests\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_PASSED || 0}} tests passed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_FAILED || 0}} tests failed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_SKIPPED || 0}} tests skipped" >> $GITHUB_OUTPUT
               echo "testRunStatusDisplay=ALL TESTS HAVE PASSED" >> $GITHUB_OUTPUT
             elif [ "${{ steps.browserstack_build_status.outputs.BROWSERSTACK_BUILD_STATUS }}" == "timedout" ]; then
               echo "test-badge=${{ env.BS_TIMEOUT_BADGE }}" >> $GITHUB_OUTPUT
               echo "status-emoji=-1" >> $GITHUB_OUTPUT
-              echo "slack-message=<${{ steps.pr_data.outputs.PR_URL }}|${{ steps.pr_data.outputs.BRANCH_NAME }}>\n:x: Browserstack Test Run has Timed Out!\n\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_CASES || 0 }} Total Tests\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_PASSED || 0}} tests passed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_FAILED || 0}} tests failed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_SKIPPED || 0}} tests skipped" >> $GITHUB_OUTPUT
+              echo "slack-message=<${{ steps.pr_data.outputs.PR_URL }}|${{ steps.get-branch.outputs.BRANCH_NAME }}>\n:x: Browserstack Test Run has Timed Out!\n\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_CASES || 0 }} Total Tests\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_PASSED || 0}} tests passed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_FAILED || 0}} tests failed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_SKIPPED || 0}} tests skipped" >> $GITHUB_OUTPUT
               echo "testRunStatusDisplay=TEST RUN HAS TIMED OUT" >> $GITHUB_OUTPUT
             else
               echo "test-badge=${{ env.BS_FAILURE_BADGE }}" >> $GITHUB_OUTPUT
               echo "status-emoji=-1" >> $GITHUB_OUTPUT
-              echo "slack-message=<${{ steps.pr_data.outputs.PR_URL }}|${{ steps.pr_data.outputs.BRANCH_NAME }}>\n:x: Browserstack Test Run has FAILED!\n\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_CASES || 0 }} Total Tests\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_PASSED || 0}} tests passed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_FAILED || 0}} tests failed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_SKIPPED || 0}} tests skipped" >> $GITHUB_OUTPUT
+              echo "slack-message=<${{ steps.pr_data.outputs.PR_URL }}|${{ steps.get-branch.outputs.BRANCH_NAME }}>\n:x: Browserstack Test Run has FAILED!\n\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_CASES || 0 }} Total Tests\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_PASSED || 0}} tests passed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_FAILED || 0}} tests failed\n${{ steps.browserstack_build_status.outputs.BUILD_TESTS_SKIPPED || 0}} tests skipped" >> $GITHUB_OUTPUT
               echo "testRunStatusDisplay=SOME TESTS HAVE FAILED" >> $GITHUB_OUTPUT
             fi
             echo "pr-comment-url=${{ steps.run_browserstack_tests.outputs.BROWSERSTACK_BUILD_URL }}" >> $GITHUB_OUTPUT
