@@ -66,8 +66,9 @@ jobs:
           result-encoding: string
 
       - name: Issue number
+        id: issue_number
         run: |
-          echo '${{steps.get_issue_number.outputs.result}}'
+          echo 'ISSUE_NUMBER => ${{steps.get_issue_number.outputs.result}}'
           echo "PR_NUMBER=${{steps.get_issue_number.outputs.result}}" >> "$GITHUB_OUTPUT"
           
       - name: Get branch names.
@@ -102,19 +103,17 @@ jobs:
 
       - name: Outputs
         run: |  
-          echo "The PR_NUMBER is ${{ env.PR_NUMBER }}"
-          echo "BRANCH_NAME ==> ${{ env.BRANCH_NAME }}"
-          echo "PR_URL=https://github.com/gopuff/gopuff_godrive_v2/pull/${{ env.PR_NUMBER }}"
+          echo "The PR_NUMBER is ${{ steps.issue_number.outputs.PR_NUMBER }}"
+          echo "PR_URL=https://github.com/gopuff/gopuff_godrive_v2/pull/${{ steps.issue_number.outputs.PR_NUMBER }}"
           echo "COMMENT_ID=${{ github.event.comment.id }}" >> "$GITHUB_OUTPUT"
-          echo "GH_EVENT_OBJECT Number ==> ${{ env.GH_EVENT_OBJECT }}"
           echo 'Comment ID => ${{ github.event.comment.id }}'
           echo "Issue received ==> ${{ github.event.comment.body }}"
-          echo "PR_URL ==> ${{ env.PR_URL }}"
+          echo "PR_URL ==> https://github.com/gopuff/gopuff_godrive_v2/pull/${{ steps.issue_number.outputs.PR_NUMBER }}"
 
       - name: Update comment:running
         uses: peter-evans/create-or-update-comment@v4
         with:
-          comment-id: ${{ env.COMMENT_ID }}
+          comment-id: ${{ github.event.comment.id }}
           body: |
             ...Building the app and preparing to run BrowserStack test suite, check back here for results...
           edit-mode: append
