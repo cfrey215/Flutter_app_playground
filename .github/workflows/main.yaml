@@ -75,7 +75,7 @@ jobs:
         id: create_comment
         uses: peter-evans/create-or-update-comment@v4
         with:
-          issue-number: ${{ env.COMMENT_ID }}
+          comment-id: ${{ env.COMMENT_ID }}
           body: |
             Building the app and preparing to run BrowserStack test suite, check back here for results...
           reactions: 'rocket'
