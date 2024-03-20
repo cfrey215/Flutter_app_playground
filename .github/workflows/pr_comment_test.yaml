@@ -100,7 +100,7 @@ jobs:
         run: |  
           echo "The PR_NUMBER is ${{ env.PR_NUMBER }}"
           echo "BRANCH_NAME ==> ${{ env.BRANCH_NAME }}"
-          echo "PR_URL=https://github.com/gopuff/gopuff_godrive_v2/pull/${{ env.PR_NUMBER }}
+          echo "PR_URL=https://github.com/gopuff/gopuff_godrive_v2/pull/${{ env.PR_NUMBER }}"
           echo "COMMENT_ID=${{ github.event.comment.id }}" >> "$GITHUB_OUTPUT"
           echo "GH_EVENT_OBJECT Number ==> ${{ env.GH_EVENT_OBJECT }}"
           echo 'Comment ID => ${{ github.event.comment.id }}'
