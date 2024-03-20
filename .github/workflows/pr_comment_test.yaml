@@ -16,6 +16,10 @@ permissions:
   issues: write
   pull-requests: write
   contents: read
+env:
+  PR_NUMBER: 0
+  BRANCH_NAME: ''
+  COMMENT_ID: 0
 
 jobs:
   # # This job only runs for issues

@@ -62,20 +62,41 @@ jobs:
       - name: Issue number
         id: issue_number
         run: |
+<<<<<<< HEAD
           echo 'ISSUE_NUMBER => ${{steps.get_issue_number.outputs.result}}'
+=======
+          echo '${{steps.get_issue_number.outputs.result}}'
+>>>>>>> d02af36 (main gha comment test)
           echo "PR_NUMBER=${{steps.get_issue_number.outputs.result}}" >> "$GITHUB_OUTPUT"
           
       - name: Get branch names.
         id: branch-names
         uses: tj-actions/branch-names@v8
 
+      - name: Running on the default branch.
+        if: steps.branch-names.outputs.is_default == 'true'
+        run: |
+          echo "Running on default: ${{ steps.branch-names.outputs.current_branch }}" 
+        # Outputs: "Running on default: main"
+      
       - name: Running on a pull request branch.
-        id: get_pr_data
         if: steps.branch-names.outputs.is_default == 'false'
         run: |
-          echo "BRANCH_NAME=${{ steps.branch-names.outputs.current_branch }}" >> "$GITHUB_OUTPUT"
+          echo "Running on pr: ${{ steps.branch-names.outputs.current_branch }}"
+        # Outputs: "Running on pr: feature/test"
+      
+      - name: Running on a pull request branch.
+        if: steps.branch-names.outputs.is_default == 'false'
+        run: |
+          echo "Base branch: ${{ steps.branch-names.outputs.base_ref_branch }}"
+        # Outputs: "Base branch: main"
+        
+      - name: Running on any event.
+        run: |
+          echo "Default branch: ${{ steps.branch-names.outputs.default_branch }}
 
       - name: Outputs
+<<<<<<< HEAD
         id: pr_data
         run: |  
           echo "The PR_NUMBER is ${{ steps.issue_number.outputs.PR_NUMBER }}"
@@ -85,27 +106,18 @@ jobs:
           echo 'Comment ID => ${{ github.event.comment.id }}'
           echo "Issue received ==> ${{ github.event.comment.body }}"
           echo "PR_URL ==> https://github.com/gopuff/gopuff_godrive_v2/pull/${{ steps.issue_number.outputs.PR_NUMBER }}"
+=======
+        run: |  
+          echo "BRANCH_NAME ==> ${{ env.BRANCH_NAME }}"
+          echo "PR_URL=https://github.com/gopuff/gopuff_godrive_v2/pull/${{ env.PR_NUMBER }}
+          echo "COMMENT_ID=${{ github.event.comment.id }}" >> "$GITHUB_OUTPUT"
+>>>>>>> d02af36 (main gha comment test)
 
-      # - uses: actions/github-script@v7
-      #   id: get_pr_data
-      #   with:
-      #     script: |
-      #         return (
-      #           await github.rest.repos.listPullRequestsAssociatedWithCommit({
-      #             commit_sha: context.sha,
-      #             owner: context.repo.owner,
-      #             repo: context.repo.repo,
-      #           })
-      #         ).data[0];
-
-      # - name: Pull Request data
-      #   id: pr_data
-      #   run: |
-      #     echo '${{ fromJson(steps.get_pr_data.outputs.result).number }}'
-      #     echo '${{ fromJson(steps.get_pr_data.outputs.result).title }}'
-      #     echo '${{ fromJson(steps.get_pr_data.outputs.result).pull_request.head.url }}'
-      #     echo "BRANCH_NAME=${{ fromJson(steps.get_pr_data.outputs.result).title }}" >> "$GITHUB_OUTPUT"
-      #     echo "PR_URL=https://github.com/cfrey215/Flutter_app_playground/pull/${{ fromJson(steps.get_pr_data.outputs.result).number }}" >> "$GITHUB_OUTPUT"
+          echo "The PR_NUMBER is ${{ env.PR_NUMBER }}"
+          echo "GH_EVENT_OBJECT Number ==> ${{ env.GH_EVENT_OBJECT }}"
+          echo 'Comment ID => ${{ github.event.comment.id }}'
+          echo "Issue received ==> ${{ github.event.comment.body }}"
+          echo "PR_URL ==> ${{ env.PR_URL }}"
 
       - name: Create comment
         id: create_comment
